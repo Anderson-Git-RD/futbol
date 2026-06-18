@@ -10,7 +10,6 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,7 +24,6 @@
       padding: 2rem;
     }
 
-    /* ===== LOGIN OVERLAY ===== */
     .login-overlay {
       position: fixed;
       top: 0;
@@ -53,8 +51,7 @@
     .login-card .lock-icon { font-size: 3rem; color: #c9a03d; margin-bottom: 1rem; }
     .login-card h2 { color: #e8d5a3; font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 0.5rem; }
     .login-card p { color: #8a8a9a; font-size: 0.8rem; margin-bottom: 1.5rem; }
-    .login-card input[type="email"],
-    .login-card input[type="password"] {
+    .login-card input {
       width: 100%;
       padding: 14px 16px;
       margin: 8px 0;
@@ -66,29 +63,6 @@
       font-size: 1rem;
     }
     .login-card input:focus { outline: none; border-color: #c9a03d; }
-
-    .remember-me {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 12px 0 8px 0;
-      justify-content: flex-start;
-    }
-    .remember-me input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: #c9a03d;
-      cursor: pointer;
-      margin: 0;
-    }
-    .remember-me label {
-      color: #8a8a9a;
-      font-size: 0.8rem;
-      cursor: pointer;
-      user-select: none;
-    }
-    .remember-me label:hover { color: #c9a03d; }
-
     .login-card .btn-login {
       width: 100%;
       padding: 14px;
@@ -99,7 +73,7 @@
       font-size: 1rem;
       cursor: pointer;
       color: #0a0c12;
-      margin-top: 8px;
+      margin-top: 12px;
       transition: 0.2s;
     }
     .login-card .btn-login:hover { background: #e8c45a; transform: translateY(-2px); }
@@ -120,10 +94,96 @@
     .login-card .btn-back:hover { background: #1a1c24; border-color: #5a5a6a; color: #c9a03d; }
     .login-card .error-msg { color: #e74c3c; font-size: 0.8rem; margin-top: 10px; display: none; }
     .login-card .error-msg.show { display: block; }
-    .login-card .hint { font-size: 0.65rem; color: #5a5a6a; margin-top: 15px; border-top: 1px solid #1e1f28; padding-top: 15px; }
-    .login-card .hint span { color: #c9a03d; }
+    .login-card .success-msg { color: #6fcf97; font-size: 0.8rem; margin-top: 10px; display: none; }
+    .login-card .success-msg.show { display: block; }
+    .login-card .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0 8px 0;
+      justify-content: flex-start;
+    }
+    .login-card .remember-me input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #c9a03d;
+      cursor: pointer;
+      margin: 0;
+    }
+    .login-card .remember-me label {
+      color: #8a8a9a;
+      font-size: 0.8rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .login-card .remember-me label:hover { color: #c9a03d; }
 
-    /* ===== ESTILOS DEL MARCADOR ===== */
+    /* ===== TOAST NOTIFICATIONS ===== */
+    .toast-container {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 380px;
+      width: 100%;
+    }
+    .toast {
+      background: #1a1c24;
+      border: 1px solid #3a3a48;
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: slideIn 0.3s ease-out;
+      transform-origin: right;
+    }
+    .toast.success { border-left: 4px solid #6fcf97; }
+    .toast.error { border-left: 4px solid #e74c3c; }
+    .toast.info { border-left: 4px solid #c9a03d; }
+    .toast .toast-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .toast.success .toast-icon { color: #6fcf97; }
+    .toast.error .toast-icon { color: #e74c3c; }
+    .toast.info .toast-icon { color: #c9a03d; }
+    .toast .toast-content {
+      flex: 1;
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .toast .toast-content strong {
+      color: #e8d5a3;
+    }
+    .toast .toast-close {
+      background: none;
+      border: none;
+      color: #6a6a7a;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 4px;
+      transition: 0.2s;
+    }
+    .toast .toast-close:hover { color: #e8d5a3; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(100px); }
+    }
+    .toast.hiding {
+      animation: slideOut 0.3s ease-in forwards;
+    }
+
     .premium-container {
       max-width: 1200px;
       width: 100%;
@@ -523,6 +583,8 @@
       .team-selector select { min-width: 150px; font-size: 0.75rem; }
       .login-card { padding: 1.5rem; }
       .login-card h2 { font-size: 1.4rem; }
+      .toast-container { top: 70px; right: 10px; max-width: 300px; }
+      .toast { padding: 12px 16px; font-size: 0.85rem; }
     }
   </style>
 </head>
@@ -535,26 +597,24 @@
     <h2>🔐 Acceso Restringido</h2>
     <p>Ingresa tus credenciales para usar el marcador</p>
     
-    <input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="email">
-    <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password">
+    <input type="text" id="loginUser" placeholder="Usuario">
+    <input type="password" id="loginPass" placeholder="Contraseña">
     
     <div class="remember-me">
       <input type="checkbox" id="rememberMe">
       <label for="rememberMe">🔒 Recordar usuario</label>
     </div>
     
-    <div class="error-msg" id="loginError">
-      <i class="fas fa-exclamation-circle"></i> <span id="errorText">Credenciales incorrectas</span>
-    </div>
+    <div class="error-msg" id="loginError">Usuario o contraseña incorrectos</div>
+    <div class="success-msg" id="loginSuccess">✅ Sesión iniciada</div>
     
     <button class="btn-login" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Acceder al Marcador</button>
     <button class="btn-back" id="backBtn"><i class="fas fa-arrow-left"></i> Volver a la tabla</button>
-    
-    <div class="hint">
-      <i class="fas fa-info-circle"></i> Usa tu correo y contraseña registrados en Firebase
-    </div>
   </div>
 </div>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div class="toast-container" id="toastContainer"></div>
 
 <!-- ===== MENÚ HAMBURGUESA ===== -->
 <div class="menu-container">
@@ -567,7 +627,7 @@
   <a href="index.html"><i class="fas fa-table"></i> Tabla de Posiciones</a>
   <a href="contador.html" class="active-page"><i class="fas fa-futbol"></i> Marcador · Goles y Tiempo</a>
   <div class="admin-badge">
-    <i class="fas fa-user-shield"></i> Administrador: <span id="adminEmailDisplay">admin</span>
+    <i class="fas fa-user-shield"></i> Administrador: <span id="adminDisplay">superior</span>
     <div class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</div>
   </div>
 </div>
@@ -667,6 +727,43 @@
 </div>
 
 <script>
+  // ==================== TOAST NOTIFICATIONS ====================
+  function showToast(message, type = 'info', duration = 3500) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = '';
+    if (type === 'success') icon = 'fa-check-circle';
+    else if (type === 'error') icon = 'fa-exclamation-circle';
+    else icon = 'fa-info-circle';
+    
+    toast.innerHTML = `
+      <div class="toast-icon"><i class="fas ${icon}"></i></div>
+      <div class="toast-content">${message}</div>
+      <button class="toast-close"><i class="fas fa-times"></i></button>
+    `;
+    
+    container.appendChild(toast);
+    
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+      toast.classList.add('hiding');
+      setTimeout(() => toast.remove(), 300);
+    });
+    
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, duration);
+  }
+
+  // ==================== CREDENCIALES FIJAS ====================
+  const ADMIN_USER = "superior";
+  const ADMIN_PASS = "fut1214";
+
   // ==================== FIREBASE CONFIG ====================
   const firebaseConfig = {
     apiKey: "AIzaSyCYKgzeg6JYBKCbE741LaICNuL5YnDYcvM",
@@ -681,35 +778,45 @@
   if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
   }
-  const auth = firebase.auth();
   const db = firebase.firestore();
 
   // ==================== REFERENCIAS DOM ====================
   const loginOverlay = document.getElementById('loginOverlay');
-  const loginEmail = document.getElementById('loginEmail');
-  const loginPassword = document.getElementById('loginPassword');
+  const loginUser = document.getElementById('loginUser');
+  const loginPass = document.getElementById('loginPass');
   const loginBtn = document.getElementById('loginBtn');
   const backBtn = document.getElementById('backBtn');
   const rememberMe = document.getElementById('rememberMe');
   const loginError = document.getElementById('loginError');
-  const errorText = document.getElementById('errorText');
-  const adminEmailDisplay = document.getElementById('adminEmailDisplay');
+  const loginSuccess = document.getElementById('loginSuccess');
   const connectionStatus = document.getElementById('connectionStatus');
 
   // ==================== RECORDAR USUARIO ====================
-  const savedEmail = localStorage.getItem('rememberedEmailCounter');
-  if (savedEmail) {
-    loginEmail.value = savedEmail;
+  const savedUser = localStorage.getItem('rememberedUserCounter');
+  if (savedUser === ADMIN_USER) {
+    loginUser.value = savedUser;
     rememberMe.checked = true;
-    loginPassword.focus();
+    loginPass.focus();
   }
 
   // ==================== FUNCIONES UI ====================
   function showError(msg) {
-    errorText.textContent = msg;
+    loginError.textContent = msg;
     loginError.classList.add('show');
+    loginSuccess.classList.remove('show');
   }
-  function hideMessages() { loginError.classList.remove('show'); }
+
+  function showSuccess(msg) {
+    loginSuccess.textContent = msg;
+    loginSuccess.classList.add('show');
+    loginError.classList.remove('show');
+  }
+
+  function hideMessages() {
+    loginError.classList.remove('show');
+    loginSuccess.classList.remove('show');
+  }
+
   function setLoading(loading) {
     if (loading) {
       loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
@@ -720,65 +827,61 @@
     }
   }
 
-  backBtn.addEventListener('click', () => { window.location.href = "index.html"; });
-
   // ==================== LOGIN ====================
-  loginBtn.addEventListener('click', () => {
-    const email = loginEmail.value.trim();
-    const password = loginPassword.value;
+  function handleLogin() {
+    const user = loginUser.value.trim();
+    const pass = loginPass.value;
 
-    if (!email || !password) {
-      showError('Ingresa correo y contraseña');
+    if (!user || !pass) {
+      showError('Ingresa usuario y contraseña');
       return;
     }
 
     hideMessages();
     setLoading(true);
 
-    auth.signInWithEmailAndPassword(email, password)
-      .then((userCredential) => {
+    setTimeout(() => {
+      if (user === ADMIN_USER && pass === ADMIN_PASS) {
         setLoading(false);
-        loginOverlay.classList.add('hidden');
-        adminEmailDisplay.textContent = userCredential.user.email;
+        showSuccess('✅ Sesión iniciada correctamente');
         
         if (rememberMe.checked) {
-          localStorage.setItem('rememberedEmailCounter', email);
+          localStorage.setItem('rememberedUserCounter', user);
         } else {
-          localStorage.removeItem('rememberedEmailCounter');
+          localStorage.removeItem('rememberedUserCounter');
         }
         
-        sessionStorage.setItem("userEmailCounter", userCredential.user.email);
-        iniciarAplicacion();
-      })
-      .catch((error) => {
+        sessionStorage.setItem("counterAuthenticated", "true");
+        setTimeout(() => {
+          loginOverlay.classList.add('hidden');
+          iniciarAplicacion();
+        }, 400);
+      } else {
         setLoading(false);
-        let msg = 'Credenciales incorrectas';
-        if (error.code === 'auth/user-not-found') msg = 'Usuario no encontrado';
-        if (error.code === 'auth/wrong-password') msg = 'Contraseña incorrecta';
-        if (error.code === 'auth/invalid-email') msg = 'Correo electrónico inválido';
-        if (error.code === 'auth/too-many-requests') msg = 'Demasiados intentos. Espera un momento';
-        showError(msg);
-      });
+        showError('Usuario o contraseña incorrectos');
+        loginPass.value = '';
+        loginPass.focus();
+      }
+    }, 600);
+  }
+
+  loginBtn.addEventListener('click', handleLogin);
+  loginPass.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleLogin();
+  });
+  loginUser.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') loginPass.focus();
   });
 
-  loginPassword.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') loginBtn.click();
-  });
-  loginEmail.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') loginPassword.focus();
+  backBtn.addEventListener('click', () => {
+    window.location.href = "index.html";
   });
 
   // ==================== VERIFICAR SESIÓN ====================
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      loginOverlay.classList.add('hidden');
-      adminEmailDisplay.textContent = user.email;
-      sessionStorage.setItem("userEmailCounter", user.email);
-      iniciarAplicacion();
-    } else {
-      loginOverlay.classList.remove('hidden');
-    }
-  });
+  if (sessionStorage.getItem("counterAuthenticated") === "true") {
+    loginOverlay.classList.add('hidden');
+    iniciarAplicacion();
+  }
 
   // ==================== VARIABLES DEL MARCADOR ====================
   const COLECCIONES = {
@@ -912,11 +1015,13 @@
     isRunning = true;
     timerInterval = setInterval(timerTick, 1000);
     saveMatchState();
+    showToast('⏱️ <strong>Temporizador iniciado</strong>', 'info');
   }
 
   function pauseTimer() {
     isRunning = false;
     saveMatchState();
+    showToast('⏸️ <strong>Temporizador pausado</strong>', 'info');
   }
 
   function resetTimerOnly() {
@@ -929,6 +1034,7 @@
     extraTimeIndicator.style.display = 'none';
     updateTimerUI();
     saveMatchState();
+    showToast('🔄 <strong>Temporizador reiniciado</strong>', 'info');
   }
 
   function setCustomMinutes() {
@@ -937,6 +1043,7 @@
     totalMinutes = mins;
     resetTimerOnly();
     saveMatchState();
+    showToast(`⏱️ <strong>Tiempo fijado en ${mins} minutos</strong>`, 'success');
   }
 
   function addExtraMinute() {
@@ -951,6 +1058,7 @@
     }
     updateTimerUI();
     saveMatchState();
+    showToast('➕ <strong>+1 minuto de tiempo extra agregado</strong>', 'info');
   }
 
   function resetExtraTime() {
@@ -962,6 +1070,7 @@
       extraTimeIndicator.style.display = 'none';
       updateTimerUI();
       saveMatchState();
+      showToast('🔄 <strong>Tiempo extra reiniciado</strong>', 'info');
     }
   }
 
@@ -972,6 +1081,7 @@
     document.getElementById('homeGoals').textContent = '0';
     document.getElementById('awayGoals').textContent = '0';
     saveMatchState();
+    showToast('🔄 <strong>Partido reiniciado completamente</strong>', 'info');
   }
 
   function populateSelectors(teamsArray) {
@@ -997,8 +1107,14 @@
   function loadSelectedTeams() {
     const homeName = document.getElementById('homeTeamSelect').value;
     const awayName = document.getElementById('awayTeamSelect').value;
-    if (!homeName || !awayName) { alert("❌ Selecciona ambos equipos"); return false; }
-    if (homeName === awayName) { alert("❌ Los equipos deben ser diferentes"); return false; }
+    if (!homeName || !awayName) {
+      showToast('❌ <strong>Selecciona ambos equipos</strong>', 'error');
+      return false;
+    }
+    if (homeName === awayName) {
+      showToast('❌ <strong>Los equipos deben ser diferentes</strong>', 'error');
+      return false;
+    }
     currentHomeTeam = teamsList.find(t => (t.nombre || t.name) === homeName);
     currentAwayTeam = teamsList.find(t => (t.nombre || t.name) === awayName);
     if (currentHomeTeam && currentAwayTeam) {
@@ -1007,6 +1123,7 @@
       document.getElementById('awayEmoji').textContent = currentAwayTeam.emoji || '⚽';
       document.getElementById('awayTeamName').textContent = currentAwayTeam.nombre || currentAwayTeam.name;
       saveMatchState();
+      showToast(`✅ <strong>Equipos cargados:</strong> ${homeName} vs ${awayName}`, 'success');
       return true;
     }
     return false;
@@ -1014,7 +1131,7 @@
 
   function openGoalModal(team) {
     if (!currentHomeTeam || !currentAwayTeam) {
-      alert("❌ Primero carga los equipos con 'Cargar equipos'");
+      showToast('❌ <strong>Primero carga los equipos</strong>', 'error');
       return;
     }
     currentGoalTeam = team;
@@ -1078,16 +1195,23 @@
 
   document.getElementById('confirmGoal').addEventListener('click', function() {
     const scorer = document.getElementById('goalScorer').value;
-    if (!scorer) { alert("❌ Selecciona al goleador"); return; }
+    if (!scorer) {
+      showToast('❌ <strong>Selecciona al goleador</strong>', 'error');
+      return;
+    }
     const hasAssist = document.getElementById('hasAssist').checked;
     let assist = '';
     if (hasAssist) {
       assist = document.getElementById('goalAssist').value;
-      if (!assist) { alert("❌ Selecciona al asistente"); return; }
+      if (!assist) {
+        showToast('❌ <strong>Selecciona al asistente</strong>', 'error');
+        return;
+      }
     }
     if (currentGoalTeam === 'home') { homeGoals++; document.getElementById('homeGoals').textContent = homeGoals; }
     else { awayGoals++; document.getElementById('awayGoals').textContent = awayGoals; }
     const teamName = currentGoalTeam === 'home' ? (currentHomeTeam.nombre || currentHomeTeam.name) : (currentAwayTeam.nombre || currentAwayTeam.name);
+    
     COLECCIONES.scorers.get().then((snapshot) => {
       let scorersList = [];
       snapshot.forEach(doc => { const data = doc.data(); data.id = doc.id; scorersList.push(data); });
@@ -1112,6 +1236,7 @@
     }
     saveMatchState();
     document.getElementById('goalModal').classList.remove('active');
+    showToast(`⚽ <strong>¡GOL!</strong> ${scorer} anotó para ${teamName}`, 'success');
   });
 
   document.getElementById('cancelGoal').addEventListener('click', function() {
@@ -1120,13 +1245,14 @@
 
   function submitResult() {
     if (!currentHomeTeam || !currentAwayTeam) {
-      alert("❌ Primero selecciona los equipos con 'Cargar equipos'");
+      showToast('❌ <strong>Primero carga los equipos</strong>', 'error');
       return;
     }
     const golesLocal = homeGoals;
     const golesVisitante = awayGoals;
     const homeName = currentHomeTeam.nombre || currentHomeTeam.name;
     const awayName = currentAwayTeam.nombre || currentAwayTeam.name;
+    
     COLECCIONES.teams.get().then((snapshot) => {
       let homeDoc = null, awayDoc = null;
       snapshot.forEach(doc => {
@@ -1149,10 +1275,10 @@
           COLECCIONES.teams.doc(homeId).update({ draws: firebase.firestore.FieldValue.increment(1) });
           COLECCIONES.teams.doc(awayId).update({ draws: firebase.firestore.FieldValue.increment(1) });
         }
-        alert(`✅ RESULTADO REGISTRADO\n\n${homeName} ${golesLocal} - ${golesVisitante} ${awayName}\n\nLa tabla de posiciones se ha actualizado.`);
+        showToast(`✅ <strong>Resultado registrado:</strong> ${homeName} ${golesLocal} - ${golesVisitante} ${awayName}`, 'success');
         homeGoals = 0; awayGoals = 0; updateGoalsUI();
       } else {
-        alert("❌ Error al actualizar la tabla");
+        showToast('❌ <strong>Error al actualizar la tabla</strong>', 'error');
       }
     });
   }
@@ -1161,8 +1287,14 @@
     if (!db) return;
 
     db.collection('tabla_posiciones').onSnapshot(
-      () => { connectionStatus.className = 'connection-status online'; connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Conectado'; },
-      () => { connectionStatus.className = 'connection-status offline'; connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Sin conexión'; }
+      () => {
+        connectionStatus.className = 'connection-status online';
+        connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Conectado';
+      },
+      () => {
+        connectionStatus.className = 'connection-status offline';
+        connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Sin conexión';
+      }
     );
 
     COLECCIONES.teams.onSnapshot((snapshot) => {
@@ -1200,14 +1332,13 @@
   if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
-    auth.signOut().then(() => {
-      sessionStorage.removeItem("userEmailCounter");
+    sessionStorage.removeItem("counterAuthenticated");
+    localStorage.removeItem('rememberedUserCounter');
+    showToast('👋 <strong>Sesión cerrada</strong>', 'info');
+    setTimeout(() => {
       window.location.href = "index.html";
-    });
+    }, 500);
   });
-
-  const savedUserCounter = sessionStorage.getItem("userEmailCounter");
-  if (savedUserCounter) adminEmailDisplay.textContent = savedUserCounter;
 </script>
 </body>
 </html>
