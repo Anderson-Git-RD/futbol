@@ -6,13 +6,14 @@
   <title>Marcador · Control de Partido</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #0a0c12;
       background-image: radial-gradient(circle at 25% 40%, #121520 0%, #080a0f 100%);
@@ -24,6 +25,105 @@
       padding: 2rem;
     }
 
+    /* ===== LOGIN OVERLAY ===== */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.92);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-overlay.hidden { display: none; }
+
+    .login-card {
+      background: #12141c;
+      border: 1px solid #3a3a48;
+      border-radius: 12px;
+      padding: 2.5rem;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+    .login-card .lock-icon { font-size: 3rem; color: #c9a03d; margin-bottom: 1rem; }
+    .login-card h2 { color: #e8d5a3; font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .login-card p { color: #8a8a9a; font-size: 0.8rem; margin-bottom: 1.5rem; }
+    .login-card input[type="email"],
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: 14px 16px;
+      margin: 8px 0;
+      background: #1a1c24;
+      border: 1px solid #3a3a48;
+      border-radius: 6px;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+    }
+    .login-card input:focus { outline: none; border-color: #c9a03d; }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0 8px 0;
+      justify-content: flex-start;
+    }
+    .remember-me input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #c9a03d;
+      cursor: pointer;
+      margin: 0;
+    }
+    .remember-me label {
+      color: #8a8a9a;
+      font-size: 0.8rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .remember-me label:hover { color: #c9a03d; }
+
+    .login-card .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: #c9a03d;
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #0a0c12;
+      margin-top: 8px;
+      transition: 0.2s;
+    }
+    .login-card .btn-login:hover { background: #e8c45a; transform: translateY(-2px); }
+    .login-card .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .login-card .btn-back {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid #3a3a48;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #8a8a9a;
+      margin-top: 8px;
+      transition: 0.2s;
+    }
+    .login-card .btn-back:hover { background: #1a1c24; border-color: #5a5a6a; color: #c9a03d; }
+    .login-card .error-msg { color: #e74c3c; font-size: 0.8rem; margin-top: 10px; display: none; }
+    .login-card .error-msg.show { display: block; }
+    .login-card .hint { font-size: 0.65rem; color: #5a5a6a; margin-top: 15px; border-top: 1px solid #1e1f28; padding-top: 15px; }
+    .login-card .hint span { color: #c9a03d; }
+
+    /* ===== ESTILOS DEL MARCADOR ===== */
     .premium-container {
       max-width: 1200px;
       width: 100%;
@@ -34,7 +134,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .premium-container::before {
       content: "";
       position: absolute;
@@ -44,14 +143,12 @@
       height: 3px;
       background: linear-gradient(90deg, #c9a03d, #f2d06b, #c9a03d);
     }
-
     .premium-header {
       padding: 2rem 2rem 1rem 2rem;
       border-bottom: 1px solid #1e1f28;
       background: #0a0c10;
       text-align: center;
     }
-
     .premium-header h1 {
       font-family: 'Cormorant Garamond', serif;
       font-size: 2.2rem;
@@ -61,103 +158,33 @@
       text-transform: uppercase;
       margin-bottom: 8px;
     }
+    .premium-header h1 i { color: #c9a03d; margin-right: 12px; }
+    .sub-header { font-size: 0.7rem; color: #6a6a7a; letter-spacing: 1px; text-transform: uppercase; }
 
-    .premium-header h1 i {
-      color: #c9a03d;
-      margin-right: 12px;
-    }
-
-    .sub-header {
-      font-size: 0.7rem;
-      color: #6a6a7a;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    /* MENÚ HAMBURGUESA */
-    .menu-container {
-      position: fixed;
-      top: 25px;
-      right: 25px;
-      z-index: 1000;
-    }
-
+    .menu-container { position: fixed; top: 25px; right: 25px; z-index: 1000; }
     .menu-toggle {
-      width: 48px;
-      height: 48px;
-      background: #1a1c24;
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      border: 1px solid #3a3a48;
-      transition: all 0.2s;
+      width: 48px; height: 48px; background: #1a1c24; border-radius: 50%;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 1px solid #3a3a48; transition: all 0.2s;
     }
-
-    .menu-toggle:hover {
-      background: #2a2c34;
-      border-color: #c9a03d;
-    }
-
-    .menu-toggle span {
-      width: 22px;
-      height: 2px;
-      background: #e8d5a3;
-      margin: 3px 0;
-      border-radius: 2px;
-    }
-
+    .menu-toggle:hover { background: #2a2c34; border-color: #c9a03d; }
+    .menu-toggle span { width: 22px; height: 2px; background: #e8d5a3; margin: 3px 0; border-radius: 2px; }
     .menu-panel {
-      position: fixed;
-      top: 0;
-      right: -300px;
-      width: 280px;
-      height: 100vh;
-      background: #0c0e14;
-      box-shadow: -5px 0 30px rgba(0,0,0,0.6);
-      transition: right 0.3s ease;
-      z-index: 999;
-      padding-top: 80px;
+      position: fixed; top: 0; right: -300px; width: 280px; height: 100vh;
+      background: #0c0e14; box-shadow: -5px 0 30px rgba(0,0,0,0.6);
+      transition: right 0.3s ease; z-index: 999; padding-top: 80px;
       border-left: 1px solid #2a2a38;
     }
-
-    .menu-panel.active {
-      right: 0;
-    }
-
+    .menu-panel.active { right: 0; }
     .menu-panel a {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 16px 25px;
-      color: #b8b8c8;
-      text-decoration: none;
-      font-size: 1rem;
-      font-weight: 500;
-      transition: 0.2s;
-      border-bottom: 1px solid #1a1c24;
+      display: flex; align-items: center; gap: 15px; padding: 16px 25px;
+      color: #b8b8c8; text-decoration: none; font-size: 1rem; font-weight: 500;
+      transition: 0.2s; border-bottom: 1px solid #1a1c24;
     }
-
-    .menu-panel a i {
-      width: 28px;
-      color: #c9a03d;
-    }
-
-    .menu-panel a:hover {
-      background: #1a1c24;
-      color: #e8d5a3;
-      padding-left: 32px;
-    }
-
-    .menu-panel .active-page {
-      background: #1a1c24;
-      border-left: 3px solid #c9a03d;
-      color: #e8d5a3;
-    }
-
+    .menu-panel a i { width: 28px; color: #c9a03d; }
+    .menu-panel a:hover { background: #1a1c24; color: #e8d5a3; padding-left: 32px; }
+    .menu-panel .active-page { background: #1a1c24; border-left: 3px solid #c9a03d; color: #e8d5a3; }
     .admin-badge {
       position: absolute;
       bottom: 30px;
@@ -169,7 +196,6 @@
       font-size: 0.75rem;
       color: #6a6a7a;
     }
-
     .logout-btn {
       background: rgba(200,160,80,0.15);
       margin-top: 10px;
@@ -179,7 +205,7 @@
       text-align: center;
       color: #c9a03d;
     }
-
+    .logout-btn:hover { background: rgba(200,160,80,0.25); }
     .menu-overlay {
       position: fixed;
       top: 0;
@@ -190,12 +216,8 @@
       z-index: 998;
       display: none;
     }
+    .menu-overlay.active { display: block; }
 
-    .menu-overlay.active {
-      display: block;
-    }
-
-    /* SELECTOR DE EQUIPOS */
     .team-selector {
       padding: 1.5rem 2rem;
       background: #0a0c10;
@@ -206,7 +228,6 @@
       flex-wrap: wrap;
       align-items: center;
     }
-
     .team-selector select {
       background: #1a1c24;
       border: 1px solid #3a3a48;
@@ -218,12 +239,7 @@
       cursor: pointer;
       min-width: 200px;
     }
-
-    .team-selector select option {
-      background: #0c0e14;
-      color: #d0d0e0;
-    }
-
+    .team-selector select option { background: #0c0e14; color: #d0d0e0; }
     .team-selector button {
       background: #1a1c24;
       border: 1px solid #3a3a48;
@@ -235,17 +251,9 @@
       transition: 0.2s;
       font-size: 0.85rem;
     }
+    .team-selector button:hover { background: #2a2c34; border-color: #c9a03d; }
 
-    .team-selector button:hover {
-      background: #2a2c34;
-      border-color: #c9a03d;
-    }
-
-    /* MARCADOR PRINCIPAL */
-    .scoreboard {
-      padding: 2rem;
-    }
-
+    .scoreboard { padding: 2rem; }
     .match-teams {
       display: flex;
       justify-content: space-between;
@@ -254,7 +262,6 @@
       flex-wrap: wrap;
       margin-bottom: 2rem;
     }
-
     .team-card {
       flex: 1;
       text-align: center;
@@ -263,13 +270,7 @@
       border-radius: 8px;
       padding: 2rem 1rem;
     }
-
-    .team-emoji {
-      font-size: 4rem;
-      display: block;
-      margin-bottom: 12px;
-    }
-
+    .team-emoji { font-size: 4rem; display: block; margin-bottom: 12px; }
     .team-name {
       font-size: 1.5rem;
       font-weight: 700;
@@ -278,14 +279,12 @@
       margin-bottom: 25px;
       letter-spacing: 1px;
     }
-
     .goals-control {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 25px;
     }
-
     .goals-control button {
       background: #1a1c24;
       border: 1px solid #3a3a48;
@@ -298,12 +297,7 @@
       cursor: pointer;
       transition: 0.1s;
     }
-
-    .goals-control button:active {
-      background: #2a2c34;
-      transform: scale(0.95);
-    }
-
+    .goals-control button:active { background: #2a2c34; transform: scale(0.95); }
     .goals-number {
       font-size: 3.5rem;
       font-weight: 800;
@@ -312,15 +306,8 @@
       text-align: center;
       font-family: 'Inter', monospace;
     }
+    .vs-divider { font-size: 1.8rem; font-weight: 700; color: #6a6a7a; padding: 15px 25px; }
 
-    .vs-divider {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #6a6a7a;
-      padding: 15px 25px;
-    }
-
-    /* TEMPORIZADOR */
     .timer-section {
       background: #0a0c10;
       border: 1px solid #2a2a38;
@@ -328,7 +315,6 @@
       padding: 1.5rem;
       margin-top: 1rem;
     }
-
     .timer-display-wrapper {
       display: flex;
       justify-content: center;
@@ -337,7 +323,6 @@
       flex-wrap: wrap;
       margin-bottom: 20px;
     }
-
     .timer-display {
       font-size: 4rem;
       font-weight: 700;
@@ -351,18 +336,15 @@
       min-width: 200px;
       text-align: center;
     }
-
     .timer-display.extra-time {
       border-color: #c9a03d;
       color: #ff6b35;
       animation: pulseExtra 1.5s ease-in-out infinite;
     }
-
     @keyframes pulseExtra {
       0%, 100% { box-shadow: 0 0 10px rgba(255,100,0,0.1); }
       50% { box-shadow: 0 0 25px rgba(255,100,0,0.3); }
     }
-
     .extra-time-mini {
       font-size: 1.8rem;
       font-weight: 600;
@@ -375,26 +357,9 @@
       min-width: 120px;
       text-align: center;
     }
-
-    .extra-time-mini span {
-      font-size: 0.9rem;
-      color: #6a6a7a;
-      display: block;
-      margin-bottom: 2px;
-    }
-
-    .timer-status {
-      text-align: center;
-      font-size: 0.8rem;
-      color: #6a6a7a;
-      margin-bottom: 15px;
-    }
-
-    .timer-status .in-extra {
-      color: #ff6b35;
-      font-weight: 700;
-    }
-
+    .extra-time-mini span { font-size: 0.9rem; color: #6a6a7a; display: block; margin-bottom: 2px; }
+    .timer-status { text-align: center; font-size: 0.8rem; color: #6a6a7a; margin-bottom: 15px; }
+    .timer-status .in-extra { color: #ff6b35; font-weight: 700; }
     .timer-controls {
       display: flex;
       justify-content: center;
@@ -402,7 +367,6 @@
       flex-wrap: wrap;
       margin-bottom: 20px;
     }
-
     .timer-controls button, .time-adjust button {
       background: #1a1c24;
       border: 1px solid #3a3a48;
@@ -414,12 +378,7 @@
       color: #c9a03d;
       transition: 0.2s;
     }
-
-    .timer-controls button:hover, .time-adjust button:hover {
-      background: #2a2c34;
-      border-color: #c9a03d;
-    }
-
+    .timer-controls button:hover, .time-adjust button:hover { background: #2a2c34; border-color: #c9a03d; }
     .time-adjust {
       display: flex;
       justify-content: center;
@@ -427,12 +386,7 @@
       gap: 15px;
       flex-wrap: wrap;
     }
-
-    .time-adjust label {
-      color: #8a8a9a;
-      font-size: 0.8rem;
-    }
-
+    .time-adjust label { color: #8a8a9a; font-size: 0.8rem; }
     .time-adjust input {
       background: #1a1c24;
       border: 1px solid #3a3a48;
@@ -444,7 +398,6 @@
       width: 90px;
     }
 
-    /* BOTONES DE ACCIÓN */
     .action-buttons {
       display: flex;
       justify-content: center;
@@ -452,7 +405,6 @@
       margin-top: 25px;
       flex-wrap: wrap;
     }
-
     .btn-primary {
       background: #1a1c24;
       border: 1px solid #c9a03d;
@@ -464,37 +416,12 @@
       color: #c9a03d;
       transition: 0.2s;
     }
-
-    .btn-primary:hover {
-      background: #2a2c34;
-      transform: translateY(-2px);
-    }
-
-    .btn-submit {
-      background: #c9a03d;
-      border: 1px solid #c9a03d;
-      color: #0a0c12;
-    }
-
-    .btn-submit:hover {
-      background: #e8c45a;
-      color: #0a0c12;
-    }
-
-    .btn-reset {
-      border-color: #5a5a6a;
-      color: #8a8a9a;
-    }
-
-    .btn-danger {
-      border-color: #e74c3c;
-      color: #e74c3c;
-    }
-
-    .btn-danger:hover {
-      background: #2a1c1c;
-      border-color: #ff6b5a;
-    }
+    .btn-primary:hover { background: #2a2c34; transform: translateY(-2px); }
+    .btn-submit { background: #c9a03d; border: 1px solid #c9a03d; color: #0a0c12; }
+    .btn-submit:hover { background: #e8c45a; color: #0a0c12; }
+    .btn-reset { border-color: #5a5a6a; color: #8a8a9a; }
+    .btn-danger { border-color: #e74c3c; color: #e74c3c; }
+    .btn-danger:hover { background: #2a1c1c; border-color: #ff6b5a; }
 
     .premium-footer {
       padding: 1rem 2rem 1.5rem;
@@ -505,7 +432,6 @@
       color: #5a5a6a;
     }
 
-    /* MODAL REGISTRO DE GOL */
     .premium-modal {
       display: none;
       position: fixed;
@@ -518,11 +444,7 @@
       justify-content: center;
       align-items: center;
     }
-
-    .premium-modal.active {
-      display: flex;
-    }
-
+    .premium-modal.active { display: flex; }
     .modal-card {
       background: #12141c;
       border: 1px solid #3a3a48;
@@ -533,24 +455,8 @@
       max-height: 90vh;
       overflow-y: auto;
     }
-
-    .modal-card h3 {
-      color: #e8d5a3;
-      margin-bottom: 1.5rem;
-      font-family: 'Cormorant Garamond', serif;
-      text-align: center;
-    }
-
-    .modal-card label {
-      color: #8a8a9a;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      display: block;
-      margin-top: 10px;
-      margin-bottom: 4px;
-    }
-
+    .modal-card h3 { color: #e8d5a3; margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; text-align: center; }
+    .modal-card label { color: #8a8a9a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-top: 10px; margin-bottom: 4px; }
     .modal-card select, .modal-card input {
       width: 100%;
       padding: 12px;
@@ -561,12 +467,7 @@
       color: white;
       font-family: 'Inter', sans-serif;
     }
-
-    .modal-card select option {
-      background: #0c0e14;
-      color: #d0d0e0;
-    }
-
+    .modal-card select option { background: #0c0e14; color: #d0d0e0; }
     .modal-card button {
       background: #c9a03d;
       border: none;
@@ -578,19 +479,13 @@
       cursor: pointer;
       color: #0a0c12;
     }
-
-    .modal-card .btn-secondary {
-      background: #2a2c34;
-      color: #c9a03d;
-    }
-
+    .modal-card .btn-secondary { background: #2a2c34; color: #c9a03d; }
     .modal-card .assist-check {
       display: flex;
       align-items: center;
       gap: 10px;
       margin: 10px 0;
     }
-
     .modal-card .assist-check input[type="checkbox"] {
       width: auto;
       padding: 0;
@@ -599,7 +494,6 @@
       width: 20px;
       height: 20px;
     }
-
     .modal-card .assist-check label {
       margin: 0;
       font-size: 0.85rem;
@@ -607,6 +501,17 @@
       text-transform: none;
       letter-spacing: 0;
     }
+
+    .connection-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .connection-status.online { background: #1a3a1a; color: #6fcf97; border: 1px solid #6fcf97; }
+    .connection-status.offline { background: #3a1a1a; color: #e74c3c; border: 1px solid #e74c3c; }
 
     @media (max-width: 800px) {
       body { padding: 1rem; }
@@ -616,12 +521,42 @@
       .timer-display { font-size: 2.2rem; padding: 10px 15px; min-width: 120px; }
       .extra-time-mini { font-size: 1.2rem; padding: 8px 15px; min-width: 80px; }
       .team-selector select { min-width: 150px; font-size: 0.75rem; }
+      .login-card { padding: 1.5rem; }
+      .login-card h2 { font-size: 1.4rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- MENÚ HAMBURGUESA -->
+<!-- ===== LOGIN OVERLAY ===== -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="lock-icon"><i class="fas fa-lock"></i></div>
+    <h2>🔐 Acceso Restringido</h2>
+    <p>Ingresa tus credenciales para usar el marcador</p>
+    
+    <input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="email">
+    <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password">
+    
+    <div class="remember-me">
+      <input type="checkbox" id="rememberMe">
+      <label for="rememberMe">🔒 Recordar usuario</label>
+    </div>
+    
+    <div class="error-msg" id="loginError">
+      <i class="fas fa-exclamation-circle"></i> <span id="errorText">Credenciales incorrectas</span>
+    </div>
+    
+    <button class="btn-login" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Acceder al Marcador</button>
+    <button class="btn-back" id="backBtn"><i class="fas fa-arrow-left"></i> Volver a la tabla</button>
+    
+    <div class="hint">
+      <i class="fas fa-info-circle"></i> Usa tu correo y contraseña registrados en Firebase
+    </div>
+  </div>
+</div>
+
+<!-- ===== MENÚ HAMBURGUESA ===== -->
 <div class="menu-container">
   <div class="menu-toggle" id="menuToggle">
     <span></span><span></span><span></span>
@@ -632,30 +567,28 @@
   <a href="index.html"><i class="fas fa-table"></i> Tabla de Posiciones</a>
   <a href="contador.html" class="active-page"><i class="fas fa-futbol"></i> Marcador · Goles y Tiempo</a>
   <div class="admin-badge">
-    <i class="fas fa-user-shield"></i> Administrador: admin
+    <i class="fas fa-user-shield"></i> Administrador: <span id="adminEmailDisplay">admin</span>
     <div class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</div>
   </div>
 </div>
 
-<div class="premium-container">
+<!-- ===== CONTENIDO PRINCIPAL ===== -->
+<div class="premium-container" id="mainContent">
   <div class="premium-header">
     <h1><i class="fas fa-futbol"></i> CONTROL DE PARTIDO</h1>
-    <div class="sub-header"><i class="fas fa-exchange-alt"></i> Selecciona los equipos · Registra cada gol</div>
+    <div class="sub-header">
+      <i class="fas fa-exchange-alt"></i> Selecciona los equipos · Registra cada gol
+      <span id="connectionStatus" class="connection-status online"><i class="fas fa-wifi"></i> Conectado</span>
+    </div>
   </div>
 
-  <!-- SELECTOR DE EQUIPOS -->
   <div class="team-selector">
-    <select id="homeTeamSelect">
-      <option value="">Seleccionar equipo local</option>
-    </select>
+    <select id="homeTeamSelect"><option value="">Seleccionar equipo local</option></select>
     <span style="color:#c9a03d; font-weight:bold;">VS</span>
-    <select id="awayTeamSelect">
-      <option value="">Seleccionar equipo visitante</option>
-    </select>
+    <select id="awayTeamSelect"><option value="">Seleccionar equipo visitante</option></select>
     <button id="loadTeamsBtn"><i class="fas fa-sync-alt"></i> Cargar equipos</button>
   </div>
 
-  <!-- MARCADOR -->
   <div class="scoreboard">
     <div class="match-teams">
       <div class="team-card">
@@ -679,28 +612,21 @@
       </div>
     </div>
 
-    <!-- TEMPORIZADOR -->
     <div class="timer-section">
       <div class="timer-display-wrapper">
         <div class="timer-display" id="timerDisplay">00:00</div>
-        <div class="extra-time-mini" id="extraTimeDisplay">
-          <span>⏱️ TIEMPO EXTRA</span>
-          +00:00
-        </div>
+        <div class="extra-time-mini" id="extraTimeDisplay"><span>⏱️ TIEMPO EXTRA</span> +00:00</div>
       </div>
-      
       <div class="timer-status" id="timerStatus">
         <i class="fas fa-clock"></i> Tiempo reglamentario: <span id="totalMinutesDisplay">45</span> minutos
         <span id="extraTimeIndicator" style="display:none;" class="in-extra"> · 🔴 TIEMPO EXTRA EN CURSO</span>
       </div>
-
       <div class="timer-controls">
         <button id="startTimer"><i class="fas fa-play"></i> Iniciar</button>
         <button id="pauseTimer"><i class="fas fa-pause"></i> Pausa</button>
         <button id="resetTimer"><i class="fas fa-stop"></i> Reiniciar</button>
         <button id="addExtraTimeBtn" class="btn-danger"><i class="fas fa-plus-circle"></i> +1' Extra</button>
       </div>
-
       <div class="time-adjust">
         <label><i class="fas fa-clock"></i> Minutos reglamentarios:</label>
         <input type="number" id="customMinutes" value="45" min="0" max="120" step="1">
@@ -709,7 +635,6 @@
       </div>
     </div>
 
-    <!-- BOTONES DE ACCIÓN -->
     <div class="action-buttons">
       <button class="btn-primary btn-reset" id="resetAllBtn"><i class="fas fa-sync-alt"></i> Reiniciar Partido</button>
       <button class="btn-primary btn-submit" id="submitResultBtn"><i class="fas fa-save"></i> Registrar Resultado en Tabla</button>
@@ -726,91 +651,171 @@
 <div id="goalModal" class="premium-modal">
   <div class="modal-card">
     <h3 id="goalModalTitle"><i class="fas fa-futbol"></i> Registrar Gol</h3>
-    
     <label for="goalScorer">⚽ GOLEADOR</label>
-    <select id="goalScorer">
-      <option value="">Seleccionar jugador</option>
-    </select>
-
+    <select id="goalScorer"><option value="">Seleccionar jugador</option></select>
     <div class="assist-check">
       <input type="checkbox" id="hasAssist">
       <label for="hasAssist">🎯 Hubo asistencia</label>
     </div>
-
     <div id="assistContainer" style="display:none;">
       <label for="goalAssist">🎯 ASISTENTE</label>
-      <select id="goalAssist">
-        <option value="">Seleccionar jugador</option>
-      </select>
+      <select id="goalAssist"><option value="">Seleccionar jugador</option></select>
     </div>
-
     <button id="confirmGoal"><i class="fas fa-check"></i> Confirmar Gol</button>
     <button id="cancelGoal" class="btn-secondary"><i class="fas fa-times"></i> Cancelar</button>
   </div>
 </div>
 
 <script>
-  // ==================== CONFIGURACIÓN ====================
-  const STORAGE_KEY = "acPeraltaTeams";
-  const PLAYERS_KEY = "acPeraltaPlayers";
-  const ADMIN_USER = "admin";
-  const ADMIN_PASS = "verano2026";
+  // ==================== FIREBASE CONFIG ====================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCYKgzeg6JYBKCbE741LaICNuL5YnDYcvM",
+    authDomain: "futbol-e8360.firebaseapp.com",
+    projectId: "futbol-e8360",
+    storageBucket: "futbol-e8360.firebasestorage.app",
+    messagingSenderId: "995552726057",
+    appId: "1:995552726057:web:30e20832e4679c121a6038",
+    measurementId: "G-MWMY2H8JEM"
+  };
 
-  // ==================== CARGA DE DATOS ====================
-  function loadTeams() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-    return [];
+  if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // ==================== REFERENCIAS DOM ====================
+  const loginOverlay = document.getElementById('loginOverlay');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPassword = document.getElementById('loginPassword');
+  const loginBtn = document.getElementById('loginBtn');
+  const backBtn = document.getElementById('backBtn');
+  const rememberMe = document.getElementById('rememberMe');
+  const loginError = document.getElementById('loginError');
+  const errorText = document.getElementById('errorText');
+  const adminEmailDisplay = document.getElementById('adminEmailDisplay');
+  const connectionStatus = document.getElementById('connectionStatus');
+
+  // ==================== RECORDAR USUARIO ====================
+  const savedEmail = localStorage.getItem('rememberedEmailCounter');
+  if (savedEmail) {
+    loginEmail.value = savedEmail;
+    rememberMe.checked = true;
+    loginPassword.focus();
   }
 
-  function loadPlayers() {
-    const stored = localStorage.getItem(PLAYERS_KEY);
-    if (stored) return JSON.parse(stored);
-    return [];
+  // ==================== FUNCIONES UI ====================
+  function showError(msg) {
+    errorText.textContent = msg;
+    loginError.classList.add('show');
+  }
+  function hideMessages() { loginError.classList.remove('show'); }
+  function setLoading(loading) {
+    if (loading) {
+      loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+      loginBtn.disabled = true;
+    } else {
+      loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Acceder al Marcador';
+      loginBtn.disabled = false;
+    }
   }
 
-  let teams = loadTeams();
-  let players = loadPlayers();
+  backBtn.addEventListener('click', () => { window.location.href = "index.html"; });
+
+  // ==================== LOGIN ====================
+  loginBtn.addEventListener('click', () => {
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
+
+    if (!email || !password) {
+      showError('Ingresa correo y contraseña');
+      return;
+    }
+
+    hideMessages();
+    setLoading(true);
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        setLoading(false);
+        loginOverlay.classList.add('hidden');
+        adminEmailDisplay.textContent = userCredential.user.email;
+        
+        if (rememberMe.checked) {
+          localStorage.setItem('rememberedEmailCounter', email);
+        } else {
+          localStorage.removeItem('rememberedEmailCounter');
+        }
+        
+        sessionStorage.setItem("userEmailCounter", userCredential.user.email);
+        iniciarAplicacion();
+      })
+      .catch((error) => {
+        setLoading(false);
+        let msg = 'Credenciales incorrectas';
+        if (error.code === 'auth/user-not-found') msg = 'Usuario no encontrado';
+        if (error.code === 'auth/wrong-password') msg = 'Contraseña incorrecta';
+        if (error.code === 'auth/invalid-email') msg = 'Correo electrónico inválido';
+        if (error.code === 'auth/too-many-requests') msg = 'Demasiados intentos. Espera un momento';
+        showError(msg);
+      });
+  });
+
+  loginPassword.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') loginBtn.click();
+  });
+  loginEmail.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') loginPassword.focus();
+  });
+
+  // ==================== VERIFICAR SESIÓN ====================
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      loginOverlay.classList.add('hidden');
+      adminEmailDisplay.textContent = user.email;
+      sessionStorage.setItem("userEmailCounter", user.email);
+      iniciarAplicacion();
+    } else {
+      loginOverlay.classList.remove('hidden');
+    }
+  });
 
   // ==================== VARIABLES DEL MARCADOR ====================
+  const COLECCIONES = {
+    teams: db.collection('tabla_posiciones'),
+    players: db.collection('jugadores'),
+    scorers: db.collection('goleadores'),
+    assists: db.collection('asistentes'),
+    finalPhase: db.collection('fase_final').doc('configuracion'),
+    matchState: db.collection('estado_partido').doc('actual')
+  };
+
   let currentHomeTeam = null;
   let currentAwayTeam = null;
   let homeGoals = 0, awayGoals = 0;
-  
-  // Variables de tiempo
   let totalMinutes = 45;
   let remainingSeconds = 45 * 60;
   let extraSeconds = 0;
   let isExtraTimeActive = false;
   let timerInterval = null;
   let isRunning = false;
+  let currentGoalTeam = null;
+  let teamsList = [];
 
-  // Variables para el modal de gol
-  let currentGoalTeam = null; // 'home' o 'away'
-
-  // ==================== REFERENCIAS DOM ====================
   const timerDisplay = document.getElementById('timerDisplay');
   const extraTimeDisplay = document.getElementById('extraTimeDisplay');
-  const timerStatus = document.getElementById('timerStatus');
   const totalMinutesDisplay = document.getElementById('totalMinutesDisplay');
   const extraTimeIndicator = document.getElementById('extraTimeIndicator');
 
-  // ==================== FUNCIONES DE TIEMPO ====================
   function formatTime(secs) {
     let mins = Math.floor(secs / 60);
     let remainSecs = secs % 60;
     return `${mins.toString().padStart(2, '0')}:${remainSecs.toString().padStart(2, '0')}`;
   }
 
-  function formatExtraTime(secs) {
-    let mins = Math.floor(secs / 60);
-    let remainSecs = secs % 60;
-    return `+${mins.toString().padStart(2, '0')}:${remainSecs.toString().padStart(2, '0')}`;
-  }
-
   function updateTimerUI() {
     if (isExtraTimeActive) {
-      timerDisplay.textContent = formatExtraTime(extraSeconds);
+      timerDisplay.textContent = `+${formatTime(extraSeconds)}`;
       timerDisplay.classList.add('extra-time');
       extraTimeIndicator.style.display = 'inline';
     } else {
@@ -818,20 +823,18 @@
       timerDisplay.classList.remove('extra-time');
       extraTimeIndicator.style.display = 'none';
     }
-    
     if (extraSeconds > 0) {
       extraTimeDisplay.innerHTML = `<span>⏱️ TIEMPO EXTRA</span> +${formatTime(extraSeconds)}`;
       extraTimeDisplay.style.display = 'block';
     } else {
       extraTimeDisplay.innerHTML = `<span>⏱️ TIEMPO EXTRA</span> +00:00`;
     }
-    
     totalMinutesDisplay.textContent = totalMinutes;
+    if (COLECCIONES.matchState) saveMatchState();
   }
 
   function timerTick() {
     if (!isRunning) return;
-    
     if (isExtraTimeActive) {
       extraSeconds++;
     } else {
@@ -847,29 +850,85 @@
     updateTimerUI();
   }
 
-  // ==================== FUNCIONES DE CONTROL ====================
+  function saveMatchState() {
+    if (!COLECCIONES.matchState) return;
+    const state = {
+      homeTeam: currentHomeTeam ? currentHomeTeam.nombre || currentHomeTeam.name : null,
+      awayTeam: currentAwayTeam ? currentAwayTeam.nombre || currentAwayTeam.name : null,
+      homeGoals: homeGoals,
+      awayGoals: awayGoals,
+      totalMinutes: totalMinutes,
+      remainingSeconds: remainingSeconds,
+      extraSeconds: extraSeconds,
+      isExtraTimeActive: isExtraTimeActive,
+      isRunning: isRunning,
+      lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    COLECCIONES.matchState.set(state);
+  }
+
+  function loadMatchState() {
+    if (!COLECCIONES.matchState) return;
+    COLECCIONES.matchState.get().then((doc) => {
+      const state = doc.data();
+      if (state) {
+        if (state.homeTeam) {
+          const homeTeam = teamsList.find(t => (t.nombre || t.name) === state.homeTeam);
+          const awayTeam = teamsList.find(t => (t.nombre || t.name) === state.awayTeam);
+          if (homeTeam) {
+            currentHomeTeam = homeTeam;
+            document.getElementById('homeEmoji').textContent = homeTeam.emoji || '⚽';
+            document.getElementById('homeTeamName').textContent = homeTeam.nombre || homeTeam.name;
+            document.getElementById('homeTeamSelect').value = homeTeam.nombre || homeTeam.name;
+          }
+          if (awayTeam) {
+            currentAwayTeam = awayTeam;
+            document.getElementById('awayEmoji').textContent = awayTeam.emoji || '⚽';
+            document.getElementById('awayTeamName').textContent = awayTeam.nombre || awayTeam.name;
+            document.getElementById('awayTeamSelect').value = awayTeam.nombre || awayTeam.name;
+          }
+        }
+        homeGoals = state.homeGoals || 0;
+        awayGoals = state.awayGoals || 0;
+        document.getElementById('homeGoals').textContent = homeGoals;
+        document.getElementById('awayGoals').textContent = awayGoals;
+        totalMinutes = state.totalMinutes || 45;
+        remainingSeconds = state.remainingSeconds || totalMinutes * 60;
+        extraSeconds = state.extraSeconds || 0;
+        isExtraTimeActive = state.isExtraTimeActive || false;
+        isRunning = state.isRunning || false;
+        document.getElementById('customMinutes').value = totalMinutes;
+        updateTimerUI();
+        if (isRunning) {
+          if (timerInterval) clearInterval(timerInterval);
+          timerInterval = setInterval(timerTick, 1000);
+        }
+      }
+    });
+  }
+
   function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     isRunning = true;
     timerInterval = setInterval(timerTick, 1000);
+    saveMatchState();
   }
 
   function pauseTimer() {
     isRunning = false;
+    saveMatchState();
   }
 
   function resetTimerOnly() {
     isRunning = false;
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
     remainingSeconds = totalMinutes * 60;
     extraSeconds = 0;
     isExtraTimeActive = false;
     timerDisplay.classList.remove('extra-time');
     extraTimeIndicator.style.display = 'none';
     updateTimerUI();
+    saveMatchState();
   }
 
   function setCustomMinutes() {
@@ -877,7 +936,7 @@
     mins = Math.min(120, Math.max(0, mins));
     totalMinutes = mins;
     resetTimerOnly();
-    updateTimerUI();
+    saveMatchState();
   }
 
   function addExtraMinute() {
@@ -891,6 +950,7 @@
       extraTimeIndicator.style.display = 'inline';
     }
     updateTimerUI();
+    saveMatchState();
   }
 
   function resetExtraTime() {
@@ -901,176 +961,156 @@
       timerDisplay.classList.remove('extra-time');
       extraTimeIndicator.style.display = 'none';
       updateTimerUI();
+      saveMatchState();
     }
   }
 
   function resetFullMatch() {
-    homeGoals = 0;
-    awayGoals = 0;
+    homeGoals = 0; awayGoals = 0;
     updateGoalsUI();
     resetTimerOnly();
     document.getElementById('homeGoals').textContent = '0';
     document.getElementById('awayGoals').textContent = '0';
+    saveMatchState();
   }
 
-  // ==================== FUNCIONES DE EQUIPOS Y GOLES ====================
-  function loadTeamsFromStorage() {
-    teams = loadTeams();
-    populateSelectors();
-  }
-
-  function populateSelectors() {
+  function populateSelectors(teamsArray) {
     const homeSelect = document.getElementById('homeTeamSelect');
     const awaySelect = document.getElementById('awayTeamSelect');
     homeSelect.innerHTML = '<option value="">Seleccionar equipo local</option>';
     awaySelect.innerHTML = '<option value="">Seleccionar equipo visitante</option>';
-    teams.forEach(team => {
-      homeSelect.innerHTML += `<option value="${team.name}">${team.emoji || '⚽'} ${team.name}</option>`;
-      awaySelect.innerHTML += `<option value="${team.name}">${team.emoji || '⚽'} ${team.name}</option>`;
+    teamsArray.forEach(team => {
+      const nombre = team.nombre || team.name || '';
+      const emoji = team.emoji || '⚽';
+      homeSelect.innerHTML += `<option value="${nombre}">${emoji} ${nombre}</option>`;
+      awaySelect.innerHTML += `<option value="${nombre}">${emoji} ${nombre}</option>`;
     });
-  }
-
-  function getPlayersForTeam(teamName) {
-    return players.filter(p => p.team === teamName);
-  }
-
-  function loadSelectedTeams() {
-    const homeName = document.getElementById('homeTeamSelect').value;
-    const awayName = document.getElementById('awayTeamSelect').value;
-    if (!homeName || !awayName) {
-      alert("❌ Selecciona ambos equipos");
-      return false;
-    }
-    if (homeName === awayName) {
-      alert("❌ Los equipos deben ser diferentes");
-      return false;
-    }
-    currentHomeTeam = teams.find(t => t.name === homeName);
-    currentAwayTeam = teams.find(t => t.name === awayName);
-    if (currentHomeTeam && currentAwayTeam) {
-      document.getElementById('homeEmoji').textContent = currentHomeTeam.emoji || '⚽';
-      document.getElementById('homeTeamName').textContent = currentHomeTeam.name;
-      document.getElementById('awayEmoji').textContent = currentAwayTeam.emoji || '⚽';
-      document.getElementById('awayTeamName').textContent = currentAwayTeam.name;
-      return true;
-    }
-    return false;
+    teamsList = teamsArray;
   }
 
   function updateGoalsUI() {
     document.getElementById('homeGoals').textContent = homeGoals;
     document.getElementById('awayGoals').textContent = awayGoals;
+    saveMatchState();
   }
 
-  // ==================== MODAL DE GOL ====================
+  function loadSelectedTeams() {
+    const homeName = document.getElementById('homeTeamSelect').value;
+    const awayName = document.getElementById('awayTeamSelect').value;
+    if (!homeName || !awayName) { alert("❌ Selecciona ambos equipos"); return false; }
+    if (homeName === awayName) { alert("❌ Los equipos deben ser diferentes"); return false; }
+    currentHomeTeam = teamsList.find(t => (t.nombre || t.name) === homeName);
+    currentAwayTeam = teamsList.find(t => (t.nombre || t.name) === awayName);
+    if (currentHomeTeam && currentAwayTeam) {
+      document.getElementById('homeEmoji').textContent = currentHomeTeam.emoji || '⚽';
+      document.getElementById('homeTeamName').textContent = currentHomeTeam.nombre || currentHomeTeam.name;
+      document.getElementById('awayEmoji').textContent = currentAwayTeam.emoji || '⚽';
+      document.getElementById('awayTeamName').textContent = currentAwayTeam.nombre || currentAwayTeam.name;
+      saveMatchState();
+      return true;
+    }
+    return false;
+  }
+
   function openGoalModal(team) {
-    // Verificar que los equipos estén cargados
     if (!currentHomeTeam || !currentAwayTeam) {
       alert("❌ Primero carga los equipos con 'Cargar equipos'");
       return;
     }
-
     currentGoalTeam = team;
-    const teamName = team === 'home' ? currentHomeTeam.name : currentAwayTeam.name;
-    const teamPlayers = getPlayersForTeam(teamName);
-
-    document.getElementById('goalModalTitle').innerHTML = `<i class="fas fa-futbol"></i> Registrar Gol - ${teamName}`;
-    
-    // Llenar select de goleadores
-    const scorerSelect = document.getElementById('goalScorer');
-    scorerSelect.innerHTML = '<option value="">Seleccionar jugador</option>';
-    if (teamPlayers.length === 0) {
-      scorerSelect.innerHTML = '<option value="">No hay jugadores registrados</option>';
-    } else {
-      teamPlayers.forEach(p => {
-        scorerSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-      });
-    }
-
-    // Limpiar asistencia
-    document.getElementById('hasAssist').checked = false;
-    document.getElementById('assistContainer').style.display = 'none';
-    const assistSelect = document.getElementById('goalAssist');
-    assistSelect.innerHTML = '<option value="">Seleccionar jugador</option>';
-
-    // Abrir modal
-    document.getElementById('goalModal').classList.add('active');
+    const teamName = team === 'home' ? (currentHomeTeam.nombre || currentHomeTeam.name) : (currentAwayTeam.nombre || currentAwayTeam.name);
+    COLECCIONES.players.get().then((snapshot) => {
+      const allPlayers = [];
+      snapshot.forEach(doc => { allPlayers.push(doc.data()); });
+      const teamPlayers = allPlayers.filter(p => p.team === teamName);
+      document.getElementById('goalModalTitle').innerHTML = `<i class="fas fa-futbol"></i> Registrar Gol - ${teamName}`;
+      const scorerSelect = document.getElementById('goalScorer');
+      scorerSelect.innerHTML = '<option value="">Seleccionar jugador</option>';
+      if (teamPlayers.length === 0) {
+        scorerSelect.innerHTML = '<option value="">No hay jugadores registrados</option>';
+      } else {
+        teamPlayers.forEach(p => { scorerSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`; });
+      }
+      document.getElementById('hasAssist').checked = false;
+      document.getElementById('assistContainer').style.display = 'none';
+      document.getElementById('goalAssist').innerHTML = '<option value="">Seleccionar jugador</option>';
+      document.getElementById('goalModal').classList.add('active');
+    });
   }
 
-  // Manejar checkbox de asistencia
   document.getElementById('hasAssist').addEventListener('change', function() {
     const container = document.getElementById('assistContainer');
     const assistSelect = document.getElementById('goalAssist');
-    
     if (this.checked) {
       container.style.display = 'block';
-      // Llenar select de asistentes (excluyendo al goleador)
       const scorerName = document.getElementById('goalScorer').value;
-      const teamName = currentGoalTeam === 'home' ? currentHomeTeam.name : currentAwayTeam.name;
-      const teamPlayers = getPlayersForTeam(teamName);
-      
-      assistSelect.innerHTML = '<option value="">Seleccionar jugador</option>';
-      teamPlayers.forEach(p => {
-        if (p.name !== scorerName) {
-          assistSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-        }
+      const teamName = currentGoalTeam === 'home' ? (currentHomeTeam.nombre || currentHomeTeam.name) : (currentAwayTeam.nombre || currentAwayTeam.name);
+      COLECCIONES.players.get().then((snapshot) => {
+        const allPlayers = [];
+        snapshot.forEach(doc => { allPlayers.push(doc.data()); });
+        const teamPlayers = allPlayers.filter(p => p.team === teamName);
+        assistSelect.innerHTML = '<option value="">Seleccionar jugador</option>';
+        teamPlayers.forEach(p => {
+          if (p.name !== scorerName) { assistSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`; }
+        });
       });
     } else {
       container.style.display = 'none';
     }
   });
 
-  // Actualizar asistentes cuando cambia el goleador
   document.getElementById('goalScorer').addEventListener('change', function() {
     if (document.getElementById('hasAssist').checked) {
       const scorerName = this.value;
-      const teamName = currentGoalTeam === 'home' ? currentHomeTeam.name : currentAwayTeam.name;
-      const teamPlayers = getPlayersForTeam(teamName);
+      const teamName = currentGoalTeam === 'home' ? (currentHomeTeam.nombre || currentHomeTeam.name) : (currentAwayTeam.nombre || currentAwayTeam.name);
       const assistSelect = document.getElementById('goalAssist');
-      
-      assistSelect.innerHTML = '<option value="">Seleccionar jugador</option>';
-      teamPlayers.forEach(p => {
-        if (p.name !== scorerName) {
-          assistSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-        }
+      COLECCIONES.players.get().then((snapshot) => {
+        const allPlayers = [];
+        snapshot.forEach(doc => { allPlayers.push(doc.data()); });
+        const teamPlayers = allPlayers.filter(p => p.team === teamName);
+        assistSelect.innerHTML = '<option value="">Seleccionar jugador</option>';
+        teamPlayers.forEach(p => {
+          if (p.name !== scorerName) { assistSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`; }
+        });
       });
     }
   });
 
   document.getElementById('confirmGoal').addEventListener('click', function() {
     const scorer = document.getElementById('goalScorer').value;
-    if (!scorer) {
-      alert("❌ Selecciona al goleador");
-      return;
-    }
-
+    if (!scorer) { alert("❌ Selecciona al goleador"); return; }
     const hasAssist = document.getElementById('hasAssist').checked;
     let assist = '';
     if (hasAssist) {
       assist = document.getElementById('goalAssist').value;
-      if (!assist) {
-        alert("❌ Selecciona al asistente");
-        return;
+      if (!assist) { alert("❌ Selecciona al asistente"); return; }
+    }
+    if (currentGoalTeam === 'home') { homeGoals++; document.getElementById('homeGoals').textContent = homeGoals; }
+    else { awayGoals++; document.getElementById('awayGoals').textContent = awayGoals; }
+    const teamName = currentGoalTeam === 'home' ? (currentHomeTeam.nombre || currentHomeTeam.name) : (currentAwayTeam.nombre || currentAwayTeam.name);
+    COLECCIONES.scorers.get().then((snapshot) => {
+      let scorersList = [];
+      snapshot.forEach(doc => { const data = doc.data(); data.id = doc.id; scorersList.push(data); });
+      let scorerFound = scorersList.find(s => s.name === scorer && s.team === teamName);
+      if (scorerFound) {
+        COLECCIONES.scorers.doc(scorerFound.id).update({ goals: (scorerFound.goals || 0) + 1 });
+      } else {
+        COLECCIONES.scorers.add({ name: scorer, team: teamName, goals: 1, emoji: '⚽' });
       }
-    }
-
-    // Registrar el gol
-    if (currentGoalTeam === 'home') {
-      homeGoals++;
-      document.getElementById('homeGoals').textContent = homeGoals;
-    } else {
-      awayGoals++;
-      document.getElementById('awayGoals').textContent = awayGoals;
-    }
-
-    const teamName = currentGoalTeam === 'home' ? currentHomeTeam.name : currentAwayTeam.name;
-    let msg = `⚽ Gol de ${scorer} (${teamName})`;
+    });
     if (hasAssist && assist) {
-      msg += ` con asistencia de ${assist}`;
+      COLECCIONES.assists.get().then((snapshot) => {
+        let assistsList = [];
+        snapshot.forEach(doc => { const data = doc.data(); data.id = doc.id; assistsList.push(data); });
+        let assistFound = assistsList.find(a => a.name === assist && a.team === teamName);
+        if (assistFound) {
+          COLECCIONES.assists.doc(assistFound.id).update({ assists: (assistFound.assists || 0) + 1 });
+        } else {
+          COLECCIONES.assists.add({ name: assist, team: teamName, assists: 1, emoji: '🎯' });
+        }
+      });
     }
-    console.log(msg);
-    // Se podría mostrar en pantalla como notificación si se desea
-
+    saveMatchState();
     document.getElementById('goalModal').classList.remove('active');
   });
 
@@ -1078,101 +1118,96 @@
     document.getElementById('goalModal').classList.remove('active');
   });
 
-  // ==================== REGISTRAR RESULTADO EN TABLA ====================
   function submitResult() {
     if (!currentHomeTeam || !currentAwayTeam) {
       alert("❌ Primero selecciona los equipos con 'Cargar equipos'");
       return;
     }
-    
     const golesLocal = homeGoals;
     const golesVisitante = awayGoals;
-    
-    let updatedTeams = [...teams];
-    const homeIndex = updatedTeams.findIndex(t => t.name === currentHomeTeam.name);
-    const awayIndex = updatedTeams.findIndex(t => t.name === currentAwayTeam.name);
-    
-    if (homeIndex !== -1 && awayIndex !== -1) {
-      updatedTeams[homeIndex].gf += golesLocal;
-      updatedTeams[homeIndex].gc += golesVisitante;
-      updatedTeams[awayIndex].gf += golesVisitante;
-      updatedTeams[awayIndex].gc += golesLocal;
-      
-      if (golesLocal > golesVisitante) {
-        updatedTeams[homeIndex].wins++;
-        updatedTeams[awayIndex].losses++;
-      } else if (golesVisitante > golesLocal) {
-        updatedTeams[awayIndex].wins++;
-        updatedTeams[homeIndex].losses++;
+    const homeName = currentHomeTeam.nombre || currentHomeTeam.name;
+    const awayName = currentAwayTeam.nombre || currentAwayTeam.name;
+    COLECCIONES.teams.get().then((snapshot) => {
+      let homeDoc = null, awayDoc = null;
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if ((data.nombre || data.name) === homeName) homeDoc = doc;
+        if ((data.nombre || data.name) === awayName) awayDoc = doc;
+      });
+      if (homeDoc && awayDoc) {
+        const homeId = homeDoc.id;
+        const awayId = awayDoc.id;
+        COLECCIONES.teams.doc(homeId).update({ gf: firebase.firestore.FieldValue.increment(golesLocal), gc: firebase.firestore.FieldValue.increment(golesVisitante) });
+        COLECCIONES.teams.doc(awayId).update({ gf: firebase.firestore.FieldValue.increment(golesVisitante), gc: firebase.firestore.FieldValue.increment(golesLocal) });
+        if (golesLocal > golesVisitante) {
+          COLECCIONES.teams.doc(homeId).update({ wins: firebase.firestore.FieldValue.increment(1) });
+          COLECCIONES.teams.doc(awayId).update({ losses: firebase.firestore.FieldValue.increment(1) });
+        } else if (golesVisitante > golesLocal) {
+          COLECCIONES.teams.doc(awayId).update({ wins: firebase.firestore.FieldValue.increment(1) });
+          COLECCIONES.teams.doc(homeId).update({ losses: firebase.firestore.FieldValue.increment(1) });
+        } else {
+          COLECCIONES.teams.doc(homeId).update({ draws: firebase.firestore.FieldValue.increment(1) });
+          COLECCIONES.teams.doc(awayId).update({ draws: firebase.firestore.FieldValue.increment(1) });
+        }
+        alert(`✅ RESULTADO REGISTRADO\n\n${homeName} ${golesLocal} - ${golesVisitante} ${awayName}\n\nLa tabla de posiciones se ha actualizado.`);
+        homeGoals = 0; awayGoals = 0; updateGoalsUI();
       } else {
-        updatedTeams[homeIndex].draws++;
-        updatedTeams[awayIndex].draws++;
+        alert("❌ Error al actualizar la tabla");
       }
-      
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTeams));
-      teams = updatedTeams;
-      
-      alert(`✅ RESULTADO REGISTRADO\n\n${currentHomeTeam.name} ${golesLocal} - ${golesVisitante} ${currentAwayTeam.name}\n\nLa tabla de posiciones se ha actualizado.`);
-      
-      homeGoals = 0;
-      awayGoals = 0;
-      updateGoalsUI();
-    } else {
-      alert("❌ Error al actualizar la tabla");
-    }
+    });
   }
 
-  // ==================== EVENTOS ====================
-  document.getElementById('plusHome').onclick = () => openGoalModal('home');
-  document.getElementById('plusAway').onclick = () => openGoalModal('away');
-  
-  document.getElementById('minusHome').onclick = () => { if(homeGoals > 0) { homeGoals--; updateGoalsUI(); } };
-  document.getElementById('minusAway').onclick = () => { if(awayGoals > 0) { awayGoals--; updateGoalsUI(); } };
-  
-  document.getElementById('startTimer').onclick = startTimer;
-  document.getElementById('pauseTimer').onclick = pauseTimer;
-  document.getElementById('resetTimer').onclick = resetTimerOnly;
-  document.getElementById('setTimeBtn').onclick = setCustomMinutes;
-  document.getElementById('resetAllBtn').onclick = resetFullMatch;
-  document.getElementById('loadTeamsBtn').onclick = loadSelectedTeams;
-  document.getElementById('submitResultBtn').onclick = submitResult;
-  document.getElementById('addExtraTimeBtn').onclick = addExtraMinute;
-  document.getElementById('resetExtraTimeBtn').onclick = resetExtraTime;
+  function iniciarAplicacion() {
+    if (!db) return;
 
-  // ==================== INICIALIZACIÓN ====================
-  updateGoalsUI();
-  updateTimerUI();
-  loadTeamsFromStorage();
+    db.collection('tabla_posiciones').onSnapshot(
+      () => { connectionStatus.className = 'connection-status online'; connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Conectado'; },
+      () => { connectionStatus.className = 'connection-status offline'; connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Sin conexión'; }
+    );
 
-  // ==================== MENÚ HAMBURGUESA ====================
+    COLECCIONES.teams.onSnapshot((snapshot) => {
+      const teamsArray = [];
+      snapshot.forEach(doc => { const data = doc.data(); data.id = doc.id; teamsArray.push(data); });
+      populateSelectors(teamsArray);
+      if (teamsArray.length > 0) loadMatchState();
+    });
+
+    document.getElementById('plusHome').onclick = () => openGoalModal('home');
+    document.getElementById('plusAway').onclick = () => openGoalModal('away');
+    document.getElementById('minusHome').onclick = () => { if(homeGoals > 0) { homeGoals--; updateGoalsUI(); } };
+    document.getElementById('minusAway').onclick = () => { if(awayGoals > 0) { awayGoals--; updateGoalsUI(); } };
+    document.getElementById('startTimer').onclick = startTimer;
+    document.getElementById('pauseTimer').onclick = pauseTimer;
+    document.getElementById('resetTimer').onclick = resetTimerOnly;
+    document.getElementById('setTimeBtn').onclick = setCustomMinutes;
+    document.getElementById('resetAllBtn').onclick = resetFullMatch;
+    document.getElementById('loadTeamsBtn').onclick = loadSelectedTeams;
+    document.getElementById('submitResultBtn').onclick = submitResult;
+    document.getElementById('addExtraTimeBtn').onclick = addExtraMinute;
+    document.getElementById('resetExtraTimeBtn').onclick = resetExtraTime;
+
+    updateGoalsUI();
+    updateTimerUI();
+  }
+
+  // ==================== MENÚ ====================
   const menuToggle = document.getElementById('menuToggle');
   const menuPanel = document.getElementById('menuPanel');
   const menuOverlay = document.getElementById('menuOverlay');
-  
-  function closeMenu() {
-    menuPanel.classList.remove('active');
-    menuOverlay.classList.remove('active');
-  }
-  
-  function openMenu() {
-    menuPanel.classList.add('active');
-    menuOverlay.classList.add('active');
-  }
-  
-  if (menuToggle) {
-    menuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (menuPanel.classList.contains('active')) closeMenu();
-      else openMenu();
-    });
-  }
-  
+  function closeMenu() { menuPanel.classList.remove('active'); menuOverlay.classList.remove('active'); }
+  function openMenu() { menuPanel.classList.add('active'); menuOverlay.classList.add('active'); }
+  if (menuToggle) menuToggle.addEventListener('click', (e) => { e.stopPropagation(); if (menuPanel.classList.contains('active')) closeMenu(); else openMenu(); });
   if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
-  
+
   document.getElementById('logoutBtn').addEventListener('click', () => {
-    sessionStorage.removeItem("adminLoggedIn");
-    window.location.href = "index.html";
+    auth.signOut().then(() => {
+      sessionStorage.removeItem("userEmailCounter");
+      window.location.href = "index.html";
+    });
   });
+
+  const savedUserCounter = sessionStorage.getItem("userEmailCounter");
+  if (savedUserCounter) adminEmailDisplay.textContent = savedUserCounter;
 </script>
 </body>
 </html>

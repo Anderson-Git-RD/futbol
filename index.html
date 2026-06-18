@@ -6,13 +6,14 @@
   <title>A.C Peralta · Torneo de Verano 2026</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #0a0c12;
       background-image: radial-gradient(circle at 25% 40%, #121520 0%, #080a0f 100%);
@@ -20,7 +21,6 @@
       padding: 2rem;
       min-height: 100vh;
     }
-
     .premium-container {
       max-width: 1400px;
       width: 100%;
@@ -32,7 +32,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .premium-container::before {
       content: "";
       position: absolute;
@@ -42,13 +41,11 @@
       height: 3px;
       background: linear-gradient(90deg, #c9a03d, #f2d06b, #c9a03d);
     }
-
     .premium-header {
       padding: 2rem 2rem 1rem 2rem;
       border-bottom: 1px solid #1e1f28;
       background: #0a0c10;
     }
-
     .league-title {
       display: flex;
       justify-content: space-between;
@@ -56,7 +53,6 @@
       flex-wrap: wrap;
       margin-bottom: 0.5rem;
     }
-
     .league-title h1 {
       font-family: 'Cormorant Garamond', serif;
       font-size: 2.5rem;
@@ -66,7 +62,6 @@
       text-transform: uppercase;
       margin: 0;
     }
-
     .league-title h1 span {
       font-size: 1rem;
       font-weight: 400;
@@ -74,7 +69,6 @@
       color: #7a7a8a;
       margin-left: 12px;
     }
-
     .season-badge {
       background: #1a1c24;
       padding: 6px 14px;
@@ -84,7 +78,6 @@
       color: #c9a03d;
       border: 1px solid #2a2a38;
     }
-
     .sub-info {
       display: flex;
       justify-content: flex-end;
@@ -97,103 +90,101 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-
-    /* MENÚ HAMBURGUESA */
     .menu-container {
       position: fixed;
       top: 25px;
       right: 25px;
       z-index: 1000;
     }
-
     .menu-toggle {
-      width: 48px;
-      height: 48px;
-      background: #1a1c24;
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      border: 1px solid #3a3a48;
-      transition: all 0.2s;
+      width: 48px; height: 48px; background: #1a1c24; border-radius: 50%;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 1px solid #3a3a48; transition: all 0.2s;
     }
-
-    .menu-toggle:hover {
-      background: #2a2c34;
-      border-color: #c9a03d;
-    }
-
-    .menu-toggle span {
-      width: 22px;
-      height: 2px;
-      background: #e8d5a3;
-      margin: 3px 0;
-      border-radius: 2px;
-    }
-
+    .menu-toggle:hover { background: #2a2c34; border-color: #c9a03d; }
+    .menu-toggle span { width: 22px; height: 2px; background: #e8d5a3; margin: 3px 0; border-radius: 2px; }
     .menu-panel {
-      position: fixed;
-      top: 0;
-      right: -300px;
-      width: 280px;
-      height: 100vh;
-      background: #0c0e14;
-      box-shadow: -5px 0 30px rgba(0,0,0,0.6);
-      transition: right 0.3s ease;
-      z-index: 999;
-      padding-top: 80px;
+      position: fixed; top: 0; right: -300px; width: 280px; height: 100vh;
+      background: #0c0e14; box-shadow: -5px 0 30px rgba(0,0,0,0.6);
+      transition: right 0.3s ease; z-index: 999; padding-top: 80px;
       border-left: 1px solid #2a2a38;
     }
-
-    .menu-panel.active {
-      right: 0;
-    }
-
+    .menu-panel.active { right: 0; }
     .menu-panel a {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 16px 25px;
-      color: #b8b8c8;
-      text-decoration: none;
-      font-size: 1rem;
-      font-weight: 500;
-      transition: 0.2s;
-      border-bottom: 1px solid #1a1c24;
+      display: flex; align-items: center; gap: 15px; padding: 16px 25px;
+      color: #b8b8c8; text-decoration: none; font-size: 1rem; font-weight: 500;
+      transition: 0.2s; border-bottom: 1px solid #1a1c24;
     }
-
-    .menu-panel a i {
-      width: 28px;
-      color: #c9a03d;
-    }
-
-    .menu-panel a:hover {
-      background: #1a1c24;
-      color: #e8d5a3;
-      padding-left: 32px;
-    }
-
-    .menu-panel .active-page {
-      background: #1a1c24;
-      border-left: 3px solid #c9a03d;
-      color: #e8d5a3;
-    }
-
+    .menu-panel a i { width: 28px; color: #c9a03d; }
+    .menu-panel a:hover { background: #1a1c24; color: #e8d5a3; padding-left: 32px; }
+    .menu-panel .active-page { background: #1a1c24; border-left: 3px solid #c9a03d; color: #e8d5a3; }
     .admin-badge {
-      position: absolute;
-      bottom: 30px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      padding: 15px;
+      padding: 15px 25px;
       border-top: 1px solid #1e1f28;
       font-size: 0.75rem;
       color: #6a6a7a;
+      margin-top: 20px;
     }
-
+    .admin-badge .user-info {
+      color: #c9a03d;
+      font-weight: 600;
+    }
+    .login-form {
+      margin-top: 12px;
+    }
+    .login-form input {
+      width: 100%;
+      padding: 10px 12px;
+      margin: 6px 0;
+      background: #1a1c24;
+      border: 1px solid #3a3a48;
+      border-radius: 4px;
+      color: white;
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .login-form input:focus { outline: none; border-color: #c9a03d; }
+    .login-form .login-btn {
+      width: 100%;
+      padding: 10px;
+      background: #c9a03d;
+      border: none;
+      border-radius: 4px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #0a0c12;
+      margin-top: 6px;
+      transition: 0.2s;
+      font-size: 0.85rem;
+    }
+    .login-form .login-btn:hover { background: #e8c45a; }
+    .login-form .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .login-form .error-msg {
+      color: #e74c3c;
+      font-size: 0.7rem;
+      margin-top: 6px;
+      display: none;
+    }
+    .login-form .error-msg.show { display: block; }
+    .login-form .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    .login-form .remember-me input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #c9a03d;
+      cursor: pointer;
+      margin: 0;
+    }
+    .login-form .remember-me label {
+      color: #8a8a9a;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
     .logout-btn {
       background: rgba(200,160,80,0.15);
       margin-top: 10px;
@@ -202,8 +193,9 @@
       cursor: pointer;
       text-align: center;
       color: #c9a03d;
+      font-size: 0.75rem;
     }
-
+    .logout-btn:hover { background: rgba(200,160,80,0.25); }
     .menu-overlay {
       position: fixed;
       top: 0;
@@ -214,12 +206,8 @@
       z-index: 998;
       display: none;
     }
+    .menu-overlay.active { display: block; }
 
-    .menu-overlay.active {
-      display: block;
-    }
-
-    /* Pestañas */
     .tabs {
       display: flex;
       border-bottom: 1px solid #2a2a38;
@@ -227,7 +215,6 @@
       padding: 0 2rem;
       flex-wrap: wrap;
     }
-
     .tab-btn {
       background: none;
       border: none;
@@ -241,37 +228,17 @@
       letter-spacing: 1.5px;
       font-family: 'Inter', sans-serif;
     }
-
-    .tab-btn:hover {
-      color: #c9a03d;
-    }
-
-    .tab-btn.active {
-      color: #c9a03d;
-      border-bottom: 2px solid #c9a03d;
-    }
-
-    /* Contenedor de tablas */
-    .tab-content {
-      display: none;
-      padding: 1.5rem 2rem 2rem 2rem;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
+    .tab-btn:hover { color: #c9a03d; }
+    .tab-btn.active { color: #c9a03d; border-bottom: 2px solid #c9a03d; }
+    .tab-content { display: none; padding: 1.5rem 2rem 2rem 2rem; }
+    .tab-content.active { display: block; }
+    .table-wrapper { overflow-x: auto; }
     .premium-table {
       width: 100%;
       border-collapse: collapse;
       font-family: 'Inter', sans-serif;
       font-size: 0.85rem;
     }
-
     .premium-table th {
       text-align: center;
       padding: 1rem 0.5rem;
@@ -283,7 +250,6 @@
       border-bottom: 1px solid #2a2a38;
       background: transparent;
     }
-
     .premium-table td {
       padding: 0.9rem 0.5rem;
       text-align: center;
@@ -291,47 +257,15 @@
       color: #d0d0e0;
       font-weight: 500;
     }
-
     .premium-table td:first-child,
-    .premium-table th:first-child {
-      text-align: center;
-    }
-
-    .premium-table td:nth-child(2) {
-      text-align: left;
-      font-weight: 600;
-    }
-
-    .leader-row {
-      background: rgba(201, 160, 61, 0.08);
-      border-left: 3px solid #c9a03d;
-    }
-
-    .points-cell {
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: #e8d5a3;
-    }
-
-    .gd-positive {
-      color: #6fcf97;
-    }
-    .gd-negative {
-      color: #e74c3c;
-    }
-
-    .form-icons {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      font-size: 0.9rem;
-    }
-
-    .gold-boot {
-      color: #c9a03d;
-      margin-left: 6px;
-    }
-
+    .premium-table th:first-child { text-align: center; }
+    .premium-table td:nth-child(2) { text-align: left; font-weight: 600; }
+    .leader-row { background: rgba(201, 160, 61, 0.08); border-left: 3px solid #c9a03d; }
+    .points-cell { font-weight: 800; font-size: 1.1rem; color: #e8d5a3; }
+    .gd-positive { color: #6fcf97; }
+    .gd-negative { color: #e74c3c; }
+    .form-icons { display: flex; gap: 6px; justify-content: center; font-size: 0.9rem; }
+    .gold-boot { color: #c9a03d; margin-left: 6px; }
     .add-team-btn, .add-scorer-btn, .add-assist-btn, .add-player-btn {
       background: #1a1c24;
       border: 1px solid #3a3a48;
@@ -343,13 +277,11 @@
       transition: 0.2s;
       margin-left: 10px;
     }
-
     .add-team-btn:hover, .add-scorer-btn:hover, .add-assist-btn:hover, .add-player-btn:hover {
       background: #2a2c34;
       border-color: #c9a03d;
     }
 
-    /* Modal */
     .premium-modal {
       display: none;
       position: fixed;
@@ -362,11 +294,7 @@
       justify-content: center;
       align-items: center;
     }
-
-    .premium-modal.active {
-      display: flex;
-    }
-
+    .premium-modal.active { display: flex; }
     .modal-card {
       background: #12141c;
       border: 1px solid #3a3a48;
@@ -377,13 +305,7 @@
       max-height: 90vh;
       overflow-y: auto;
     }
-
-    .modal-card h3 {
-      color: #e8d5a3;
-      margin-bottom: 1.5rem;
-      font-family: 'Cormorant Garamond', serif;
-    }
-
+    .modal-card h3 { color: #e8d5a3; margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; }
     .modal-card input, .modal-card select {
       width: 100%;
       padding: 12px;
@@ -394,12 +316,7 @@
       color: white;
       font-family: 'Inter', sans-serif;
     }
-
-    .modal-card select option {
-      background: #0c0e14;
-      color: #d0d0e0;
-    }
-
+    .modal-card select option { background: #0c0e14; color: #d0d0e0; }
     .modal-card button {
       background: #c9a03d;
       border: none;
@@ -411,12 +328,7 @@
       cursor: pointer;
       color: #0a0c12;
     }
-
-    .modal-card .btn-secondary {
-      background: #2a2c34;
-      color: #c9a03d;
-    }
-
+    .modal-card .btn-secondary { background: #2a2c34; color: #c9a03d; }
     .delete-item {
       background: none;
       border: none;
@@ -425,12 +337,8 @@
       cursor: pointer;
       font-size: 0.8rem;
     }
+    .delete-item:hover { color: #e74c3c; }
 
-    .delete-item:hover {
-      color: #e74c3c;
-    }
-
-    /* Fase Final */
     .final-phase-wrapper {
       display: flex;
       flex-direction: column;
@@ -439,7 +347,6 @@
       max-width: 700px;
       margin: 0 auto;
     }
-
     .final-phase-card {
       background: #0a0c10;
       border: 1px solid #2a2a38;
@@ -453,7 +360,6 @@
       flex-direction: column;
       justify-content: center;
     }
-
     .final-phase-card .admin-actions {
       position: absolute;
       top: 10px;
@@ -461,7 +367,6 @@
       display: flex;
       gap: 8px;
     }
-
     .final-phase-card .admin-actions button {
       background: #1a1c24;
       border: 1px solid #3a3a48;
@@ -472,12 +377,7 @@
       font-size: 0.6rem;
       transition: 0.2s;
     }
-
-    .final-phase-card .admin-actions button:hover {
-      background: #2a2c34;
-      border-color: #c9a03d;
-    }
-
+    .final-phase-card .admin-actions button:hover { background: #2a2c34; border-color: #c9a03d; }
     .final-phase-card h3 {
       font-family: 'Cormorant Garamond', serif;
       color: #c9a03d;
@@ -488,7 +388,6 @@
       border-bottom: 1px solid #2a2a38;
       padding-bottom: 0.8rem;
     }
-
     .final-phase-card .match {
       display: flex;
       align-items: center;
@@ -496,51 +395,24 @@
       gap: 20px;
       padding: 12px 0;
     }
-
     .final-phase-card .team {
       font-weight: 600;
       color: #d0d0d0;
       min-width: 100px;
       font-size: 1.1rem;
     }
-
-    .final-phase-card .team.empty {
-      color: #4a4a5a;
-      font-style: italic;
-      font-weight: 400;
-    }
-
-    .final-phase-card .team.winner {
-      color: #c9a03d;
-    }
-
+    .final-phase-card .team.empty { color: #4a4a5a; font-style: italic; font-weight: 400; }
+    .final-phase-card .team.winner { color: #c9a03d; }
     .final-phase-card .score {
       font-weight: 700;
       font-size: 1.3rem;
       color: #e8d5a3;
       padding: 0 15px;
     }
-
-    .final-phase-card .score.empty {
-      color: #4a4a5a;
-    }
-
-    .final-phase-card .vs {
-      color: #6a6a7a;
-      font-size: 0.8rem;
-    }
-
-    .final-phase-card .match-date {
-      font-size: 0.7rem;
-      color: #5a5a6a;
-      margin-top: 6px;
-    }
-
-    .final-card-full {
-      border-color: #c9a03d;
-      border-width: 2px;
-    }
-
+    .final-phase-card .score.empty { color: #4a4a5a; }
+    .final-phase-card .vs { color: #6a6a7a; font-size: 0.8rem; }
+    .final-phase-card .match-date { font-size: 0.7rem; color: #5a5a6a; margin-top: 6px; }
+    .final-card-full { border-color: #c9a03d; border-width: 2px; }
     .winner-badge {
       background: #c9a03d;
       color: #0a0c12;
@@ -550,7 +422,6 @@
       font-weight: 700;
       margin-left: 10px;
     }
-
     .champion-banner {
       margin-top: 15px;
       padding: 10px;
@@ -570,18 +441,18 @@
       font-size: 0.65rem;
       color: #5a5a6a;
     }
-
-    .empty-state {
-      color: #4a4a5a;
-      padding: 30px 20px;
-      font-style: italic;
-      font-size: 0.9rem;
+    .empty-state { color: #4a4a5a; padding: 30px 20px; font-style: italic; font-size: 0.9rem; }
+    .empty-state i { color: #6a6a7a; margin-right: 10px; }
+    .connection-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-left: 10px;
     }
-
-    .empty-state i {
-      color: #6a6a7a;
-      margin-right: 10px;
-    }
+    .connection-status.online { background: #1a3a1a; color: #6fcf97; border: 1px solid #6fcf97; }
+    .connection-status.offline { background: #3a1a1a; color: #e74c3c; border: 1px solid #e74c3c; }
 
     @media (max-width: 800px) {
       body { padding: 1rem; }
@@ -596,7 +467,7 @@
 </head>
 <body>
 
-<!-- MENÚ HAMBURGUESA -->
+<!-- ===== MENÚ HAMBURGUESA ===== -->
 <div class="menu-container">
   <div class="menu-toggle" id="menuToggle">
     <span></span><span></span><span></span>
@@ -606,10 +477,17 @@
 <div class="menu-panel" id="menuPanel">
   <a href="index.html" class="active-page"><i class="fas fa-table"></i> Tabla de Posiciones</a>
   <a href="contador.html"><i class="fas fa-futbol"></i> Marcador · Goles y Tiempo</a>
-  <div class="admin-badge"><i class="fas fa-shield-alt"></i> Área de administración<div id="authSection"></div></div>
+  
+  <!-- ÁREA DE ADMINISTRACIÓN CON LOGIN -->
+  <div class="admin-badge">
+    <i class="fas fa-shield-alt"></i> Área de administración
+    <div id="authSection">
+      <!-- Mostrar según estado de login -->
+    </div>
+  </div>
 </div>
 
-<!-- MODAL AGREGAR EQUIPO -->
+<!-- ===== MODALES ===== -->
 <div id="addTeamModal" class="premium-modal">
   <div class="modal-card">
     <h3><i class="fas fa-plus-circle"></i> Nuevo Club</h3>
@@ -620,64 +498,55 @@
   </div>
 </div>
 
-<!-- MODAL AGREGAR JUGADOR (SOLO EQUIPO Y NOMBRE) -->
 <div id="addPlayerModal" class="premium-modal">
   <div class="modal-card">
     <h3><i class="fas fa-user-plus"></i> Agregar Jugador</h3>
-    <select id="playerTeamSelect">
-      <option value="">Seleccionar equipo</option>
-    </select>
+    <select id="playerTeamSelect"><option value="">Seleccionar equipo</option></select>
     <input type="text" id="playerName" placeholder="Nombre del jugador">
     <button id="confirmAddPlayer"><i class="fas fa-check"></i> Agregar Jugador</button>
     <button id="cancelAddPlayer" class="btn-secondary"><i class="fas fa-times"></i> Cancelar</button>
   </div>
 </div>
 
-<!-- MODAL AGREGAR GOLEADOR -->
 <div id="addScorerModal" class="premium-modal">
   <div class="modal-card">
     <h3><i class="fas fa-futbol"></i> Nuevo Goleador</h3>
     <input type="text" id="newScorerName" placeholder="Nombre del jugador">
     <input type="text" id="newScorerTeam" placeholder="Equipo">
     <input type="number" id="newScorerGoals" placeholder="Goles" value="0" min="0">
-    <input type="text" id="newScorerEmoji" placeholder="Emoji (⚡, 🔥, etc)" maxlength="5">
+    <input type="text" id="newScorerEmoji" placeholder="Emoji" maxlength="5">
     <button id="confirmAddScorer"><i class="fas fa-check"></i> Agregar Goleador</button>
     <button id="cancelAddScorer" class="btn-secondary"><i class="fas fa-times"></i> Cancelar</button>
   </div>
 </div>
 
-<!-- MODAL AGREGAR ASISTENTE -->
 <div id="addAssistModal" class="premium-modal">
   <div class="modal-card">
     <h3><i class="fas fa-hands-helping"></i> Nuevo Asistente</h3>
     <input type="text" id="newAssistName" placeholder="Nombre del jugador">
     <input type="text" id="newAssistTeam" placeholder="Equipo">
     <input type="number" id="newAssistCount" placeholder="Asistencias" value="0" min="0">
-    <input type="text" id="newAssistEmoji" placeholder="Emoji (✨, 🎯, etc)" maxlength="5">
+    <input type="text" id="newAssistEmoji" placeholder="Emoji" maxlength="5">
     <button id="confirmAddAssist"><i class="fas fa-check"></i> Agregar Asistente</button>
     <button id="cancelAddAssist" class="btn-secondary"><i class="fas fa-times"></i> Cancelar</button>
   </div>
 </div>
 
-<!-- MODAL GESTIONAR FASE FINAL -->
 <div id="manageFinalModal" class="premium-modal">
   <div class="modal-card">
     <h3 id="manageModalTitle"><i class="fas fa-edit"></i> Gestionar Partido</h3>
-    <select id="manageTeam1">
-      <option value="">Seleccionar equipo local</option>
-    </select>
-    <input type="text" id="manageScore1" placeholder="Goles equipo local" value="">
-    <select id="manageTeam2">
-      <option value="">Seleccionar equipo visitante</option>
-    </select>
-    <input type="text" id="manageScore2" placeholder="Goles equipo visitante" value="">
-    <input type="text" id="manageDate" placeholder="Fecha (ej: 18 de mayo · 20:00)">
+    <select id="manageTeam1"><option value="">Seleccionar equipo local</option></select>
+    <input type="text" id="manageScore1" placeholder="Goles local">
+    <select id="manageTeam2"><option value="">Seleccionar equipo visitante</option></select>
+    <input type="text" id="manageScore2" placeholder="Goles visitante">
+    <input type="text" id="manageDate" placeholder="Fecha">
     <button id="confirmManageMatch"><i class="fas fa-save"></i> Guardar Partido</button>
     <button id="cancelManageMatch" class="btn-secondary"><i class="fas fa-times"></i> Cancelar</button>
-    <button id="deleteMatchBtn" style="background:#8b0000; color:white; margin-top:5px;"><i class="fas fa-trash-alt"></i> Eliminar Partido</button>
+    <button id="deleteMatchBtn" style="background:#8b0000; color:white; margin-top:5px;"><i class="fas fa-trash-alt"></i> Eliminar</button>
   </div>
 </div>
 
+<!-- ===== CONTENIDO PRINCIPAL ===== -->
 <div class="premium-container">
   <div class="premium-header">
     <div class="league-title">
@@ -685,12 +554,12 @@
       <div class="season-badge"><i class="fas fa-sun"></i> TEMPORADA 2026 · VERANO</div>
     </div>
     <div class="sub-info">
+      <span id="connectionStatus" class="connection-status offline"><i class="fas fa-wifi"></i> Conectando...</span>
       <button id="openAddTeamBtn" class="add-team-btn" style="display:none;"><i class="fas fa-plus"></i> Agregar Club</button>
       <button id="openAddPlayerBtn" class="add-player-btn" style="display:none;"><i class="fas fa-user-plus"></i> Agregar Jugador</button>
     </div>
   </div>
 
-  <!-- PESTAÑAS -->
   <div class="tabs">
     <button class="tab-btn active" data-tab="tab-posiciones"><i class="fas fa-chart-line"></i> Posiciones</button>
     <button class="tab-btn" data-tab="tab-fase-final"><i class="fas fa-trophy"></i> Fase Final</button>
@@ -698,7 +567,6 @@
     <button class="tab-btn" data-tab="tab-asistentes"><i class="fas fa-hands-helping"></i> Máximos Asistentes</button>
   </div>
 
-  <!-- TABLA DE POSICIONES -->
   <div id="tab-posiciones" class="tab-content active">
     <div class="table-wrapper">
       <table class="premium-table">
@@ -710,183 +578,81 @@
     </div>
   </div>
 
-  <!-- FASE FINAL -->
   <div id="tab-fase-final" class="tab-content">
-    <div class="final-phase-wrapper" id="finalPhaseWrapper">
-      <!-- Generado por JavaScript -->
-    </div>
+    <div class="final-phase-wrapper" id="finalPhaseWrapper"></div>
   </div>
 
-  <!-- TABLA DE MÁXIMOS GOLEADORES -->
   <div id="tab-goleadores" class="tab-content">
     <div class="table-wrapper">
       <div style="text-align: right; margin-bottom: 1rem;">
         <button id="openAddScorerBtn" class="add-scorer-btn" style="display:none;"><i class="fas fa-plus"></i> Agregar Goleador</button>
       </div>
       <table class="premium-table">
-        <thead>
-          <tr><th>POS</th><th>JUGADOR</th><th>EQUIPO</th><th>GOLES</th><th>PROMEDIO</th></tr>
-        </thead>
+        <thead><tr><th>POS</th><th>JUGADOR</th><th>EQUIPO</th><th>GOLES</th><th>PROMEDIO</th></tr></thead>
         <tbody id="scorersTableBody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- TABLA DE MÁXIMOS ASISTENTES -->
   <div id="tab-asistentes" class="tab-content">
     <div class="table-wrapper">
       <div style="text-align: right; margin-bottom: 1rem;">
         <button id="openAddAssistBtn" class="add-assist-btn" style="display:none;"><i class="fas fa-plus"></i> Agregar Asistente</button>
       </div>
       <table class="premium-table">
-        <thead>
-          <tr><th>POS</th><th>JUGADOR</th><th>EQUIPO</th><th>ASISTENCIAS</th><th>PROMEDIO</th></tr>
-        </thead>
+        <thead><tr><th>POS</th><th>JUGADOR</th><th>EQUIPO</th><th>ASISTENCIAS</th><th>PROMEDIO</th></tr></thead>
         <tbody id="assistsTableBody"></tbody>
       </table>
     </div>
   </div>
 
   <div class="footer-stats">
-    <div><i class="fas fa-chart-line"></i> Actualización automática cada 25s</div>
+    <div><i class="fas fa-chart-line"></i> Actualización automática en tiempo real</div>
     <div><i class="fas fa-flag-checkered"></i> Los resultados del marcador afectan la tabla</div>
     <div><i class="fas fa-trophy"></i> Fase Final · Semifinal y Final</div>
   </div>
 </div>
 
 <script>
-  // ==================== CONFIGURACIÓN ====================
-  const STORAGE_KEY = "acPeraltaTeams";
-  const SCORERS_KEY = "acPeraltaScorers";
-  const ASSISTS_KEY = "acPeraltaAssists";
-  const PLAYERS_KEY = "acPeraltaPlayers";
-  const FINAL_PHASE_KEY = "acPeraltaFinalPhase";
-  const ADMIN_USER = "admin";
-  const ADMIN_PASS = "verano2026";
-
-  // Datos iniciales de equipos
-  const defaultTeams = [
-    { name: "FAUGET", emoji: "⚡", wins: 9, draws: 1, losses: 2, gf: 30, gc: 7 },
-    { name: "BORCELLE", emoji: "🔵", wins: 8, draws: 1, losses: 2, gf: 25, gc: 20 },
-    { name: "ENSIGNA", emoji: "🟡", wins: 6, draws: 1, losses: 5, gf: 21, gc: 18 },
-    { name: "VIBRAS", emoji: "🟣", wins: 6, draws: 0, losses: 6, gf: 20, gc: 19 },
-    { name: "LA FRIDA", emoji: "🌺", wins: 5, draws: 1, losses: 4, gf: 17, gc: 16 },
-    { name: "LA ORCHILLA", emoji: "🌸", wins: 5, draws: 0, losses: 6, gf: 27, gc: 25 },
-    { name: "MANTEL ROJO", emoji: "🔴", wins: 4, draws: 1, losses: 6, gf: 17, gc: 15 },
-    { name: "MARGARITA", emoji: "🌼", wins: 3, draws: 1, losses: 7, gf: 16, gc: 28 },
-    { name: "CLUB FAUGET", emoji: "⚽", wins: 3, draws: 0, losses: 8, gf: 14, gc: 28 },
-    { name: "OJO DULCE", emoji: "🍬", wins: 1, draws: 1, losses: 9, gf: 13, gc: 24 }
-  ];
-
-  // Datos iniciales de goleadores
-  const defaultScorers = [
-    { name: "Martínez", team: "FAUGET", goals: 12, emoji: "⚡" },
-    { name: "Lucas", team: "BORCELLE", goals: 9, emoji: "🔵" },
-    { name: "Fernández", team: "LA ORCHILLA", goals: 8, emoji: "🌸" },
-    { name: "Rodríguez", team: "ENSIGNA", goals: 7, emoji: "🟡" },
-    { name: "Silva", team: "VIBRAS", goals: 6, emoji: "🟣" },
-    { name: "Pérez", team: "LA FRIDA", goals: 5, emoji: "🌺" },
-    { name: "Gómez", team: "MANTEL ROJO", goals: 5, emoji: "🔴" },
-    { name: "Díaz", team: "FAUGET", goals: 4, emoji: "⚡" },
-    { name: "Castro", team: "MARGARITA", goals: 4, emoji: "🌼" },
-    { name: "Ramos", team: "CLUB FAUGET", goals: 3, emoji: "⚽" }
-  ];
-
-  // Datos iniciales de asistentes
-  const defaultAssists = [
-    { name: "Díaz", team: "FAUGET", assists: 8, emoji: "🎯" },
-    { name: "Martínez", team: "FAUGET", assists: 7, emoji: "⚡" },
-    { name: "Lucas", team: "BORCELLE", assists: 6, emoji: "🔵" },
-    { name: "Fernández", team: "LA ORCHILLA", assists: 5, emoji: "🌸" },
-    { name: "Rodríguez", team: "ENSIGNA", assists: 5, emoji: "🟡" },
-    { name: "Silva", team: "VIBRAS", assists: 4, emoji: "🟣" },
-    { name: "Pérez", team: "LA FRIDA", assists: 4, emoji: "🌺" },
-    { name: "Gómez", team: "MANTEL ROJO", assists: 3, emoji: "🔴" },
-    { name: "Castro", team: "MARGARITA", assists: 3, emoji: "🌼" },
-    { name: "Ramos", team: "CLUB FAUGET", assists: 2, emoji: "⚽" }
-  ];
-
-  // FASE FINAL - VACÍA POR DEFECTO
-  const defaultFinalPhase = {
-    semifinal: { team1: "", team2: "", score1: "", score2: "", date: "" },
-    final: { team1: "", team2: "", score1: "", score2: "", date: "" }
+  // ==================== FIREBASE CONFIG ====================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCYKgzeg6JYBKCbE741LaICNuL5YnDYcvM",
+    authDomain: "futbol-e8360.firebaseapp.com",
+    projectId: "futbol-e8360",
+    storageBucket: "futbol-e8360.firebasestorage.app",
+    messagingSenderId: "995552726057",
+    appId: "1:995552726057:web:30e20832e4679c121a6038",
+    measurementId: "G-MWMY2H8JEM"
   };
 
-  // JUGADORES - VACÍO POR DEFECTO (solo se almacenan para referencia, no se muestran en tabla)
-  const defaultPlayers = [];
-
-  // ==================== FUNCIONES DE CARGA Y GUARDADO ====================
-  function loadTeams() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultTeams));
-    return [...defaultTeams];
+  if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
   }
-
-  function saveTeams(teams) { localStorage.setItem(STORAGE_KEY, JSON.stringify(teams)); }
-
-  function loadScorers() {
-    const stored = localStorage.getItem(SCORERS_KEY);
-    if (stored) return JSON.parse(stored);
-    localStorage.setItem(SCORERS_KEY, JSON.stringify(defaultScorers));
-    return [...defaultScorers];
-  }
-
-  function saveScorers(scorers) { localStorage.setItem(SCORERS_KEY, JSON.stringify(scorers)); }
-
-  function loadAssists() {
-    const stored = localStorage.getItem(ASSISTS_KEY);
-    if (stored) return JSON.parse(stored);
-    localStorage.setItem(ASSISTS_KEY, JSON.stringify(defaultAssists));
-    return [...defaultAssists];
-  }
-
-  function saveAssists(assists) { localStorage.setItem(ASSISTS_KEY, JSON.stringify(assists)); }
-
-  function loadPlayers() {
-    const stored = localStorage.getItem(PLAYERS_KEY);
-    if (stored) return JSON.parse(stored);
-    localStorage.setItem(PLAYERS_KEY, JSON.stringify(defaultPlayers));
-    return [...defaultPlayers];
-  }
-
-  function savePlayers(players) { localStorage.setItem(PLAYERS_KEY, JSON.stringify(players)); }
-
-  function loadFinalPhase() {
-    const stored = localStorage.getItem(FINAL_PHASE_KEY);
-    if (stored) return JSON.parse(stored);
-    localStorage.setItem(FINAL_PHASE_KEY, JSON.stringify(defaultFinalPhase));
-    return JSON.parse(JSON.stringify(defaultFinalPhase));
-  }
-
-  function saveFinalPhase(phase) { localStorage.setItem(FINAL_PHASE_KEY, JSON.stringify(phase)); }
-
-  let teams = loadTeams();
-  let scorers = loadScorers();
-  let assists = loadAssists();
-  let players = loadPlayers();
-  let finalPhase = loadFinalPhase();
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
   // ==================== FUNCIONES DE TABLA ====================
   function computeTable(teamsArray) {
     return teamsArray.map(t => {
-      const played = t.wins + t.draws + t.losses;
-      const points = (t.wins * 3) + t.draws;
-      const diff = t.gf - t.gc;
+      const played = (t.wins || 0) + (t.draws || 0) + (t.losses || 0);
+      const points = ((t.wins || 0) * 3) + (t.draws || 0);
+      const diff = (t.gf || 0) - (t.gc || 0);
       return { ...t, played, points, diff };
     }).sort((a,b) => {
       if (a.points !== b.points) return b.points - a.points;
       if (a.diff !== b.diff) return b.diff - a.diff;
-      return b.gf - a.gf;
+      return (b.gf || 0) - (a.gf || 0);
     });
   }
 
   function getFormSequence(team) {
-    const total = team.played || 1;
-    const winRate = team.wins / total;
-    const drawRate = team.draws / total;
+    const total = (team.played || 0);
+    if (total === 0) return ['🟨', '🟨', '🟨', '🟨', '🟨'];
+    const winRate = (team.wins || 0) / total;
+    const drawRate = (team.draws || 0) / total;
     let seed = 0;
-    for (let i=0; i<team.name.length; i++) seed += team.name.charCodeAt(i);
+    const name = team.nombre || team.name || 'team';
+    for (let i=0; i<name.length; i++) seed += name.charCodeAt(i);
     const forms = [];
     for (let i=0; i<5; i++) {
       let rand = (seed * (i+1) * 83) % 100;
@@ -897,28 +663,41 @@
     return forms;
   }
 
-  let league = computeTable(teams);
+  function isAdminLoggedIn() { return sessionStorage.getItem("adminLoggedIn") === "true"; }
 
-  function renderTable() {
+  // ==================== RENDER FUNCTIONS ====================
+  function renderTable(teamsList) {
     const tbody = document.getElementById('leagueTableBody');
     if (!tbody) return;
-    tbody.innerHTML = '';
+    if (!teamsList || teamsList.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#6a6a7a;padding:30px;">
+        <i class="fas fa-info-circle"></i> No hay equipos registrados.
+      </td></tr>`;
+      return;
+    }
+    const league = computeTable(teamsList);
     const isAdmin = isAdminLoggedIn();
+    tbody.innerHTML = '';
     league.forEach((team, idx) => {
       const pos = idx + 1;
       const isLeader = pos === 1;
+      const nombre = team.nombre || team.name || 'Sin nombre';
+      const emoji = team.emoji || '⚽';
       const formHtml = getFormSequence(team).map(icon => `<span style="font-size:0.8rem;">${icon}</span>`).join('');
       const signDiff = team.diff > 0 ? `+${team.diff}` : `${team.diff}`;
-      
       const row = document.createElement('tr');
       if (isLeader) row.classList.add('leader-row');
       row.innerHTML = `
         <td style="font-weight:700;">${pos}</td>
-        <td style="text-align:left;"><strong>${team.emoji || '⚽'} ${team.name}</strong>${isAdmin ? `<button class="delete-item delete-team" data-name="${team.name}"><i class="fas fa-trash-alt"></i></button>` : ''}</td>
-        <td>${team.played}</td><td>${team.wins}</td><td>${team.draws}</td><td>${team.losses}</td>
-        <td>${team.gf}</td><td>${team.gc}</td>
+        <td style="text-align:left;"><strong>${emoji} ${nombre}</strong>${isAdmin ? `<button class="delete-item delete-team" data-id="${team.id || ''}" data-name="${nombre}"><i class="fas fa-trash-alt"></i></button>` : ''}</td>
+        <td>${team.played || 0}</td>
+        <td>${team.wins || 0}</td>
+        <td>${team.draws || 0}</td>
+        <td>${team.losses || 0}</td>
+        <td>${team.gf || 0}</td>
+        <td>${team.gc || 0}</td>
         <td class="${team.diff >= 0 ? 'gd-positive' : 'gd-negative'}">${signDiff}</td>
-        <td class="points-cell">${team.points}</td>
+        <td class="points-cell">${team.points || 0}</td>
         <td class="form-icons">${formHtml}</td>
       `;
       tbody.appendChild(row);
@@ -927,38 +706,39 @@
       document.querySelectorAll('.delete-team').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
+          const teamId = btn.getAttribute('data-id');
           const teamName = btn.getAttribute('data-name');
           if (confirm(`¿Eliminar a ${teamName} de la liga?`)) {
-            teams = teams.filter(t => t.name !== teamName);
-            saveTeams(teams);
-            // También eliminar jugadores del equipo
-            players = players.filter(p => p.team !== teamName);
-            savePlayers(players);
-            league = computeTable(teams);
-            renderTable();
+            if (teamId) db.collection('tabla_posiciones').doc(teamId).delete();
           }
         });
       });
     }
   }
 
-  function renderScorersTable() {
+  function renderScorersTable(scorersList) {
     const tbody = document.getElementById('scorersTableBody');
     if (!tbody) return;
-    const sortedScorers = [...scorers].sort((a,b) => b.goals - a.goals);
-    tbody.innerHTML = '';
+    const sorted = [...scorersList].sort((a,b) => (b.goals || 0) - (a.goals || 0));
     const isAdmin = isAdminLoggedIn();
-    sortedScorers.forEach((scorer, idx) => {
+    tbody.innerHTML = '';
+    if (!sorted || sorted.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6a6a7a;padding:30px;">
+        <i class="fas fa-info-circle"></i> No hay goleadores registrados
+      </td></tr>`;
+      return;
+    }
+    sorted.forEach((scorer, idx) => {
       const pos = idx + 1;
       const isTop = pos === 1;
       const row = document.createElement('tr');
       if (isTop) row.classList.add('leader-row');
       row.innerHTML = `
         <td style="font-weight:700;">${pos}${pos === 1 ? ' <i class="fas fa-crown gold-boot"></i>' : ''}</td>
-        <td style="text-align:left;"><strong>${scorer.emoji || '⚽'} ${scorer.name}</strong>${isAdmin ? `<button class="delete-item delete-scorer" data-name="${scorer.name}"><i class="fas fa-trash-alt"></i></button>` : ''}</td>
+        <td style="text-align:left;"><strong>${scorer.emoji || '⚽'} ${scorer.name}</strong>${isAdmin ? `<button class="delete-item delete-scorer" data-id="${scorer.id || ''}" data-name="${scorer.name}"><i class="fas fa-trash-alt"></i></button>` : ''}</td>
         <td>${scorer.team}</td>
-        <td class="points-cell">${scorer.goals}</td>
-        <td>${(scorer.goals / 14).toFixed(2)}</td>
+        <td class="points-cell">${scorer.goals || 0}</td>
+        <td>${((scorer.goals || 0) / 14).toFixed(2)}</td>
       `;
       tbody.appendChild(row);
     });
@@ -966,34 +746,39 @@
       document.querySelectorAll('.delete-scorer').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const playerName = btn.getAttribute('data-name');
-          if (confirm(`¿Eliminar a ${playerName} de los goleadores?`)) {
-            scorers = scorers.filter(s => s.name !== playerName);
-            saveScorers(scorers);
-            renderScorersTable();
+          const scorerId = btn.getAttribute('data-id');
+          const name = btn.getAttribute('data-name');
+          if (confirm(`¿Eliminar a ${name} de los goleadores?`)) {
+            if (scorerId) db.collection('goleadores').doc(scorerId).delete();
           }
         });
       });
     }
   }
 
-  function renderAssistsTable() {
+  function renderAssistsTable(assistsList) {
     const tbody = document.getElementById('assistsTableBody');
     if (!tbody) return;
-    const sortedAssists = [...assists].sort((a,b) => b.assists - a.assists);
-    tbody.innerHTML = '';
+    const sorted = [...assistsList].sort((a,b) => (b.assists || 0) - (a.assists || 0));
     const isAdmin = isAdminLoggedIn();
-    sortedAssists.forEach((assist, idx) => {
+    tbody.innerHTML = '';
+    if (!sorted || sorted.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6a6a7a;padding:30px;">
+        <i class="fas fa-info-circle"></i> No hay asistentes registrados
+      </td></tr>`;
+      return;
+    }
+    sorted.forEach((assist, idx) => {
       const pos = idx + 1;
       const isTop = pos === 1;
       const row = document.createElement('tr');
       if (isTop) row.classList.add('leader-row');
       row.innerHTML = `
         <td style="font-weight:700;">${pos}${pos === 1 ? ' <i class="fas fa-crown gold-boot"></i>' : ''}</td>
-        <td style="text-align:left;"><strong>${assist.emoji || '🎯'} ${assist.name}</strong>${isAdmin ? `<button class="delete-item delete-assist" data-name="${assist.name}"><i class="fas fa-trash-alt"></i></button>` : ''}</td>
+        <td style="text-align:left;"><strong>${assist.emoji || '🎯'} ${assist.name}</strong>${isAdmin ? `<button class="delete-item delete-assist" data-id="${assist.id || ''}" data-name="${assist.name}"><i class="fas fa-trash-alt"></i></button>` : ''}</td>
         <td>${assist.team}</td>
-        <td class="points-cell">${assist.assists}</td>
-        <td>${(assist.assists / 14).toFixed(2)}</td>
+        <td class="points-cell">${assist.assists || 0}</td>
+        <td>${((assist.assists || 0) / 14).toFixed(2)}</td>
       `;
       tbody.appendChild(row);
     });
@@ -1001,130 +786,100 @@
       document.querySelectorAll('.delete-assist').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const playerName = btn.getAttribute('data-name');
-          if (confirm(`¿Eliminar a ${playerName} de los asistentes?`)) {
-            assists = assists.filter(a => a.name !== playerName);
-            saveAssists(assists);
-            renderAssistsTable();
+          const assistId = btn.getAttribute('data-id');
+          const name = btn.getAttribute('data-name');
+          if (confirm(`¿Eliminar a ${name} de los asistentes?`)) {
+            if (assistId) db.collection('asistentes').doc(assistId).delete();
           }
         });
       });
     }
   }
 
-  // ==================== RENDER FASE FINAL ====================
-  function renderFinalPhase() {
+  function renderFinalPhase(finalPhaseData) {
     const wrapper = document.getElementById('finalPhaseWrapper');
     if (!wrapper) return;
     const isAdmin = isAdminLoggedIn();
-    
-    const sf = finalPhase.semifinal || { team1: "", team2: "", score1: "", score2: "", date: "" };
-    const f = finalPhase.final || { team1: "", team2: "", score1: "", score2: "", date: "" };
-
+    const sf = finalPhaseData?.semifinal || { team1: "", team2: "", score1: "", score2: "", date: "" };
+    const f = finalPhaseData?.final || { team1: "", team2: "", score1: "", score2: "", date: "" };
     const hasSemifinal = sf.team1 || sf.team2;
     const hasFinal = f.team1 || f.team2;
-
     const getTeamDisplay = (team) => {
       if (!team || team === "") return '<span class="team empty">Sin definir</span>';
       return `<span class="team">${team}</span>`;
     };
-
     const getScoreDisplay = (score) => {
       if (score === undefined || score === "" || score === null) return '<span class="score empty">-</span>';
       return `<span class="score">${score}</span>`;
     };
-
     const sfWinner = (sf.score1 !== "" && sf.score2 !== "" && parseInt(sf.score1) > parseInt(sf.score2)) ? sf.team1 : 
                      (sf.score1 !== "" && sf.score2 !== "" && parseInt(sf.score2) > parseInt(sf.score1)) ? sf.team2 : null;
-
     const fWinner = (f.score1 !== "" && f.score2 !== "" && parseInt(f.score1) > parseInt(f.score2)) ? f.team1 : 
                     (f.score1 !== "" && f.score2 !== "" && parseInt(f.score2) > parseInt(f.score1)) ? f.team2 : null;
-
     let html = '';
-
     html += `
       <div class="final-phase-card" id="semifinalCard">
-        ${isAdmin ? `<div class="admin-actions">
-          <button onclick="openManageMatch('semifinal')"><i class="fas fa-edit"></i></button>
-        </div>` : ''}
+        ${isAdmin ? `<div class="admin-actions"><button onclick="openManageMatch('semifinal')"><i class="fas fa-edit"></i></button></div>` : ''}
         <h3><i class="fas fa-flag"></i> Semifinal</h3>
     `;
-
     if (hasSemifinal) {
       html += `
         <div class="match">
-          ${getTeamDisplay(sf.team1)}
-          ${getScoreDisplay(sf.score1)}
+          ${getTeamDisplay(sf.team1)} ${getScoreDisplay(sf.score1)}
           <span class="vs">VS</span>
-          ${getScoreDisplay(sf.score2)}
-          ${getTeamDisplay(sf.team2)}
+          ${getScoreDisplay(sf.score2)} ${getTeamDisplay(sf.team2)}
         </div>
         ${sfWinner ? `<div style="margin-top:8px; font-size:0.8rem; color:#c9a03d;"><i class="fas fa-arrow-right"></i> ${sfWinner} clasifica a la final</div>` : ''}
         <div class="match-date">${sf.date || 'Fecha por definir'}</div>
       `;
     } else {
-      html += `
-        <div class="empty-state">
-          <i class="fas fa-info-circle"></i> Sin partido definido. Haz clic en ✏️ para agregar equipos.
-        </div>
-      `;
+      html += `<div class="empty-state"><i class="fas fa-info-circle"></i> Sin partido definido.</div>`;
     }
-
     html += `</div>`;
-
     html += `
       <div class="final-phase-card final-card-full" id="finalCard">
-        ${isAdmin ? `<div class="admin-actions">
-          <button onclick="openManageMatch('final')"><i class="fas fa-edit"></i></button>
-        </div>` : ''}
+        ${isAdmin ? `<div class="admin-actions"><button onclick="openManageMatch('final')"><i class="fas fa-edit"></i></button></div>` : ''}
         <h3><i class="fas fa-trophy"></i> GRAN FINAL</h3>
     `;
-
     if (hasFinal) {
       html += `
         <div class="match">
-          ${getTeamDisplay(f.team1)}
-          ${getScoreDisplay(f.score1)}
+          ${getTeamDisplay(f.team1)} ${getScoreDisplay(f.score1)}
           <span class="vs">VS</span>
-          ${getScoreDisplay(f.score2)}
-          ${getTeamDisplay(f.team2)}
+          ${getScoreDisplay(f.score2)} ${getTeamDisplay(f.team2)}
           ${fWinner ? `<span class="winner-badge">CAMPEÓN</span>` : ''}
         </div>
         <div class="match-date">${f.date || 'Fecha por definir'}</div>
         ${fWinner ? `<div class="champion-banner"><i class="fas fa-crown"></i> ${fWinner} campeón del Torneo de Verano 2026</div>` : ''}
       `;
     } else {
-      html += `
-        <div class="empty-state">
-          <i class="fas fa-info-circle"></i> Sin partido definido. Haz clic en ✏️ para agregar equipos.
-        </div>
-      `;
+      html += `<div class="empty-state"><i class="fas fa-info-circle"></i> Sin partido definido.</div>`;
     }
-
     html += `</div>`;
-
     wrapper.innerHTML = html;
   }
 
-  // ==================== GESTIÓN DE FASE FINAL ====================
+  // ==================== GESTIÓN FASE FINAL ====================
   let currentManageType = null;
-
-  function populateTeamSelects() {
+  function populateManageSelects(teamsList) {
     const select1 = document.getElementById('manageTeam1');
     const select2 = document.getElementById('manageTeam2');
     select1.innerHTML = '<option value="">Seleccionar equipo</option>';
     select2.innerHTML = '<option value="">Seleccionar equipo</option>';
-    teams.forEach(team => {
-      select1.innerHTML += `<option value="${team.name}">${team.emoji} ${team.name}</option>`;
-      select2.innerHTML += `<option value="${team.name}">${team.emoji} ${team.name}</option>`;
+    teamsList.forEach(team => {
+      const nombre = team.nombre || team.name || '';
+      const emoji = team.emoji || '⚽';
+      select1.innerHTML += `<option value="${nombre}">${emoji} ${nombre}</option>`;
+      select2.innerHTML += `<option value="${nombre}">${emoji} ${nombre}</option>`;
     });
   }
-
-  function populatePlayerTeamSelect() {
+  function populatePlayerTeamSelect(teamsList) {
     const select = document.getElementById('playerTeamSelect');
     select.innerHTML = '<option value="">Seleccionar equipo</option>';
-    teams.forEach(team => {
-      select.innerHTML += `<option value="${team.name}">${team.emoji} ${team.name}</option>`;
+    teamsList.forEach(team => {
+      const nombre = team.nombre || team.name || '';
+      const emoji = team.emoji || '⚽';
+      select.innerHTML += `<option value="${nombre}">${emoji} ${nombre}</option>`;
     });
   }
 
@@ -1134,17 +889,18 @@
     const modal = document.getElementById('manageFinalModal');
     const title = document.getElementById('manageModalTitle');
     const deleteBtn = document.getElementById('deleteMatchBtn');
-    
-    const data = finalPhase[type];
-    document.getElementById('manageTeam1').value = data.team1 || '';
-    document.getElementById('manageTeam2').value = data.team2 || '';
-    document.getElementById('manageScore1').value = data.score1 || '';
-    document.getElementById('manageScore2').value = data.score2 || '';
-    document.getElementById('manageDate').value = data.date || '';
-    
-    title.innerHTML = `<i class="fas fa-edit"></i> ${type === 'semifinal' ? 'Semifinal' : 'Gran Final'}`;
-    deleteBtn.style.display = 'block';
-    modal.classList.add('active');
+    db.collection('fase_final').doc('configuracion').get().then((doc) => {
+      const data = doc.data() || { semifinal: { team1: "", team2: "", score1: "", score2: "", date: "" }, final: { team1: "", team2: "", score1: "", score2: "", date: "" } };
+      const matchData = data[type] || { team1: "", team2: "", score1: "", score2: "", date: "" };
+      document.getElementById('manageTeam1').value = matchData.team1 || '';
+      document.getElementById('manageTeam2').value = matchData.team2 || '';
+      document.getElementById('manageScore1').value = matchData.score1 || '';
+      document.getElementById('manageScore2').value = matchData.score2 || '';
+      document.getElementById('manageDate').value = matchData.date || '';
+      title.innerHTML = `<i class="fas fa-edit"></i> ${type === 'semifinal' ? 'Semifinal' : 'Gran Final'}`;
+      deleteBtn.style.display = 'block';
+      modal.classList.add('active');
+    });
   };
 
   document.getElementById('confirmManageMatch').addEventListener('click', () => {
@@ -1153,18 +909,21 @@
     const score1 = document.getElementById('manageScore1').value;
     const score2 = document.getElementById('manageScore2').value;
     const date = document.getElementById('manageDate').value;
-
-    finalPhase[currentManageType] = { team1, team2, score1, score2, date };
-    saveFinalPhase(finalPhase);
-    renderFinalPhase();
+    db.collection('fase_final').doc('configuracion').get().then((doc) => {
+      const current = doc.data() || { semifinal: { team1: "", team2: "", score1: "", score2: "", date: "" }, final: { team1: "", team2: "", score1: "", score2: "", date: "" } };
+      current[currentManageType] = { team1, team2, score1, score2, date };
+      db.collection('fase_final').doc('configuracion').set(current);
+    });
     document.getElementById('manageFinalModal').classList.remove('active');
   });
 
   document.getElementById('deleteMatchBtn').addEventListener('click', () => {
     if (confirm(`¿Eliminar ${currentManageType === 'semifinal' ? 'la Semifinal' : 'la Final'}?`)) {
-      finalPhase[currentManageType] = { team1: "", team2: "", score1: "", score2: "", date: "" };
-      saveFinalPhase(finalPhase);
-      renderFinalPhase();
+      db.collection('fase_final').doc('configuracion').get().then((doc) => {
+        const current = doc.data() || { semifinal: { team1: "", team2: "", score1: "", score2: "", date: "" }, final: { team1: "", team2: "", score1: "", score2: "", date: "" } };
+        current[currentManageType] = { team1: "", team2: "", score1: "", score2: "", date: "" };
+        db.collection('fase_final').doc('configuracion').set(current);
+      });
       document.getElementById('manageFinalModal').classList.remove('active');
     }
   });
@@ -1173,102 +932,43 @@
     document.getElementById('manageFinalModal').classList.remove('active');
   });
 
-  // ==================== GESTIÓN DE JUGADORES ====================
-  function openAddPlayerModal() {
-    if (!isAdminLoggedIn()) return;
-    populatePlayerTeamSelect();
-    document.getElementById('addPlayerModal').classList.add('active');
-    document.getElementById('playerName').value = '';
-  }
-
-  document.getElementById('openAddPlayerBtn').addEventListener('click', openAddPlayerModal);
-  document.getElementById('cancelAddPlayer').addEventListener('click', () => {
-    document.getElementById('addPlayerModal').classList.remove('active');
-  });
-
-  document.getElementById('confirmAddPlayer').addEventListener('click', () => {
-    const team = document.getElementById('playerTeamSelect').value;
-    const name = document.getElementById('playerName').value.trim();
-
-    if (!team) { alert("Selecciona un equipo"); return; }
-    if (!name) { alert("Ingresa el nombre del jugador"); return; }
-
-    const newPlayer = {
-      team: team,
-      name: name
-    };
-
-    players.push(newPlayer);
-    savePlayers(players);
-    document.getElementById('addPlayerModal').classList.remove('active');
-    alert(`✅ Jugador "${name}" agregado a ${team}`);
-  });
-
-  // ==================== AUTENTICACIÓN ====================
-  function isAdminLoggedIn() { return sessionStorage.getItem("adminLoggedIn") === "true"; }
-
-  function updateAuthUI() {
-    const authSection = document.getElementById('authSection');
-    const openAddTeamBtn = document.getElementById('openAddTeamBtn');
-    const openAddScorerBtn = document.getElementById('openAddScorerBtn');
-    const openAddAssistBtn = document.getElementById('openAddAssistBtn');
-    const openAddPlayerBtn = document.getElementById('openAddPlayerBtn');
-    
-    if (isAdminLoggedIn()) {
-      authSection.innerHTML = `<div style="margin-top:15px; padding:10px; background:#1a1c24; border-radius:8px;"><i class="fas fa-user-check"></i> Administrador: <strong>${ADMIN_USER}</strong><div class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</div></div>`;
-      if (openAddTeamBtn) openAddTeamBtn.style.display = "inline-block";
-      if (openAddScorerBtn) openAddScorerBtn.style.display = "inline-block";
-      if (openAddAssistBtn) openAddAssistBtn.style.display = "inline-block";
-      if (openAddPlayerBtn) openAddPlayerBtn.style.display = "inline-block";
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) logoutBtn.addEventListener('click', () => { sessionStorage.removeItem("adminLoggedIn"); location.reload(); });
-    } else {
-      authSection.innerHTML = `<div style="margin-top:15px; padding:10px; background:#1a1c24; border-radius:8px;"><i class="fas fa-lock"></i> Acceso restringido<div style="margin-top:10px;"><input type="text" id="loginUser" placeholder="Usuario" style="width:100%; padding:8px; margin-bottom:8px; background:#0c0e14; border:1px solid #2a2a38; color:white; border-radius:4px;"><input type="password" id="loginPass" placeholder="Contraseña" style="width:100%; padding:8px; background:#0c0e14; border:1px solid #2a2a38; color:white; border-radius:4px;"><button id="loginBtn" style="width:100%; padding:8px; background:#c9a03d; border:none; border-radius:4px; font-weight:bold; cursor:pointer;"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button></div><div style="font-size:0.65rem; margin-top:8px; color:#c9a03d;">Usuario: admin | Contraseña: verano2026</div></div>`;
-      if (openAddTeamBtn) openAddTeamBtn.style.display = "none";
-      if (openAddScorerBtn) openAddScorerBtn.style.display = "none";
-      if (openAddAssistBtn) openAddAssistBtn.style.display = "none";
-      if (openAddPlayerBtn) openAddPlayerBtn.style.display = "none";
-      setTimeout(() => {
-        const loginBtn = document.getElementById('loginBtn');
-        if (loginBtn) loginBtn.addEventListener('click', () => {
-          const username = document.getElementById('loginUser')?.value || "";
-          const password = document.getElementById('loginPass')?.value || "";
-          if (username === ADMIN_USER && password === ADMIN_PASS) {
-            sessionStorage.setItem("adminLoggedIn", "true");
-            location.reload();
-          } else alert("❌ Credenciales incorrectas");
-        });
-      }, 100);
-    }
-  }
-
-  // ==================== MODALES DE AGREGAR ====================
-  const teamModal = document.getElementById('addTeamModal');
-  const scorerModal = document.getElementById('addScorerModal');
-  const assistModal = document.getElementById('addAssistModal');
-  
-  document.getElementById('openAddTeamBtn')?.addEventListener('click', () => teamModal.classList.add('active'));
-  document.getElementById('cancelAddTeam')?.addEventListener('click', () => teamModal.classList.remove('active'));
+  // ==================== MODALES ====================
+  document.getElementById('openAddTeamBtn')?.addEventListener('click', () => document.getElementById('addTeamModal').classList.add('active'));
+  document.getElementById('cancelAddTeam')?.addEventListener('click', () => document.getElementById('addTeamModal').classList.remove('active'));
   document.getElementById('confirmAddTeam')?.addEventListener('click', () => {
     const newName = document.getElementById('newTeamName').value.trim();
     let newEmoji = document.getElementById('newTeamEmoji').value.trim();
     if (!newName) { alert("Nombre requerido"); return; }
     if (!newEmoji) newEmoji = "⚽";
-    if (teams.some(t => t.name.toLowerCase() === newName.toLowerCase())) { alert("Ya existe"); return; }
-    const newTeam = { name: newName, emoji: newEmoji, wins: 0, draws: 0, losses: 0, gf: 0, gc: 0 };
-    teams.push(newTeam);
-    saveTeams(teams);
-    league = computeTable(teams);
-    renderTable();
-    populateTeamSelects();
-    populatePlayerTeamSelect();
-    teamModal.classList.remove('active');
+    db.collection('tabla_posiciones').add({ nombre: newName, emoji: newEmoji, wins: 0, draws: 0, losses: 0, gf: 0, gc: 0 });
+    document.getElementById('addTeamModal').classList.remove('active');
     document.getElementById('newTeamName').value = "";
     document.getElementById('newTeamEmoji').value = "";
   });
 
-  document.getElementById('openAddScorerBtn')?.addEventListener('click', () => scorerModal.classList.add('active'));
-  document.getElementById('cancelAddScorer')?.addEventListener('click', () => scorerModal.classList.remove('active'));
+  document.getElementById('openAddPlayerBtn')?.addEventListener('click', () => {
+    if (!isAdminLoggedIn()) return;
+    db.collection('tabla_posiciones').get().then((snapshot) => {
+      const teamsList = [];
+      snapshot.forEach(doc => { const data = doc.data(); data.id = doc.id; teamsList.push(data); });
+      populatePlayerTeamSelect(teamsList);
+    });
+    document.getElementById('addPlayerModal').classList.add('active');
+    document.getElementById('playerName').value = '';
+  });
+  document.getElementById('cancelAddPlayer')?.addEventListener('click', () => document.getElementById('addPlayerModal').classList.remove('active'));
+  document.getElementById('confirmAddPlayer')?.addEventListener('click', () => {
+    const team = document.getElementById('playerTeamSelect').value;
+    const name = document.getElementById('playerName').value.trim();
+    if (!team) { alert("Selecciona un equipo"); return; }
+    if (!name) { alert("Ingresa el nombre del jugador"); return; }
+    db.collection('jugadores').add({ team: team, name: name });
+    document.getElementById('addPlayerModal').classList.remove('active');
+    alert(`✅ Jugador "${name}" agregado a ${team}`);
+  });
+
+  document.getElementById('openAddScorerBtn')?.addEventListener('click', () => document.getElementById('addScorerModal').classList.add('active'));
+  document.getElementById('cancelAddScorer')?.addEventListener('click', () => document.getElementById('addScorerModal').classList.remove('active'));
   document.getElementById('confirmAddScorer')?.addEventListener('click', () => {
     const newName = document.getElementById('newScorerName').value.trim();
     const newTeam = document.getElementById('newScorerTeam').value.trim();
@@ -1277,18 +977,12 @@
     if (!newName) { alert("Nombre del jugador requerido"); return; }
     if (!newTeam) { alert("Equipo requerido"); return; }
     if (!newEmoji) newEmoji = "⚽";
-    scorers.push({ name: newName, team: newTeam, goals: newGoals, emoji: newEmoji });
-    saveScorers(scorers);
-    renderScorersTable();
-    scorerModal.classList.remove('active');
-    document.getElementById('newScorerName').value = "";
-    document.getElementById('newScorerTeam').value = "";
-    document.getElementById('newScorerGoals').value = "0";
-    document.getElementById('newScorerEmoji').value = "";
+    db.collection('goleadores').add({ name: newName, team: newTeam, goals: newGoals, emoji: newEmoji });
+    document.getElementById('addScorerModal').classList.remove('active');
   });
 
-  document.getElementById('openAddAssistBtn')?.addEventListener('click', () => assistModal.classList.add('active'));
-  document.getElementById('cancelAddAssist')?.addEventListener('click', () => assistModal.classList.remove('active'));
+  document.getElementById('openAddAssistBtn')?.addEventListener('click', () => document.getElementById('addAssistModal').classList.add('active'));
+  document.getElementById('cancelAddAssist')?.addEventListener('click', () => document.getElementById('addAssistModal').classList.remove('active'));
   document.getElementById('confirmAddAssist')?.addEventListener('click', () => {
     const newName = document.getElementById('newAssistName').value.trim();
     const newTeam = document.getElementById('newAssistTeam').value.trim();
@@ -1297,54 +991,176 @@
     if (!newName) { alert("Nombre del jugador requerido"); return; }
     if (!newTeam) { alert("Equipo requerido"); return; }
     if (!newEmoji) newEmoji = "🎯";
-    assists.push({ name: newName, team: newTeam, assists: newAssists, emoji: newEmoji });
-    saveAssists(assists);
-    renderAssistsTable();
-    assistModal.classList.remove('active');
-    document.getElementById('newAssistName').value = "";
-    document.getElementById('newAssistTeam').value = "";
-    document.getElementById('newAssistCount').value = "0";
-    document.getElementById('newAssistEmoji').value = "";
+    db.collection('asistentes').add({ name: newName, team: newTeam, assists: newAssists, emoji: newEmoji });
+    document.getElementById('addAssistModal').classList.remove('active');
   });
 
   // ==================== PESTAÑAS ====================
-  const tabs = document.querySelectorAll('.tab-btn');
-  tabs.forEach(tab => {
+  document.querySelectorAll('.tab-btn').forEach(tab => {
     tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
       document.getElementById(tab.dataset.tab).classList.add('active');
     });
   });
 
-  // ==================== INICIALIZACIÓN ====================
-  renderTable();
-  renderScorersTable();
-  renderAssistsTable();
-  renderFinalPhase();
-  populateTeamSelects();
-  populatePlayerTeamSelect();
+  // ==================== AUTENTICACIÓN EN EL MENÚ ====================
+  const authSection = document.getElementById('authSection');
 
-  // Simulación de actualización
-  let autoInterval = setInterval(() => {
-    const updated = teams.map(t => ({ ...t }));
-    const idxA = Math.floor(Math.random() * updated.length);
-    let idxB = Math.floor(Math.random() * updated.length);
-    while (idxA === idxB) idxB = (idxB+1)%updated.length;
-    const gA = Math.floor(Math.random() * 2);
-    const gB = Math.floor(Math.random() * 2);
-    updated[idxA].gf += gA; updated[idxA].gc += gB;
-    updated[idxB].gf += gB; updated[idxB].gc += gA;
-    if (gA > gB) { updated[idxA].wins++; updated[idxB].losses++; }
-    else if (gB > gA) { updated[idxB].wins++; updated[idxA].losses++; }
-    else { updated[idxA].draws++; updated[idxB].draws++; }
-    teams = updated;
-    saveTeams(teams);
-    league = computeTable(teams);
-    renderTable();
-  }, 25000);
-  window.addEventListener('beforeunload', () => clearInterval(autoInterval));
+  function updateAuthUI() {
+    const isAdmin = isAdminLoggedIn();
+    
+    if (isAdmin) {
+      const email = sessionStorage.getItem("adminEmail") || "admin";
+      authSection.innerHTML = `
+        <div style="margin-top:8px; padding:8px 0;">
+          <div style="color:#c9a03d; font-size:0.8rem;">
+            <i class="fas fa-user-check"></i> Conectado como: <strong>${email}</strong>
+          </div>
+          <div class="logout-btn" id="logoutBtnMenu">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+          </div>
+        </div>
+      `;
+      document.getElementById('logoutBtnMenu')?.addEventListener('click', () => {
+        auth.signOut().then(() => {
+          sessionStorage.removeItem("adminLoggedIn");
+          sessionStorage.removeItem("adminEmail");
+          location.reload();
+        });
+      });
+    } else {
+      authSection.innerHTML = `
+        <div class="login-form">
+          <input type="email" id="loginEmailMenu" placeholder="Correo electrónico">
+          <input type="password" id="loginPasswordMenu" placeholder="Contraseña">
+          <div class="remember-me">
+            <input type="checkbox" id="rememberMeMenu">
+            <label for="rememberMeMenu">🔒 Recordar usuario</label>
+          </div>
+          <div class="error-msg" id="loginErrorMenu">Credenciales incorrectas</div>
+          <button class="login-btn" id="loginBtnMenu"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
+        </div>
+      `;
+      
+      // Cargar email recordado
+      const savedEmail = localStorage.getItem('rememberedEmailIndex');
+      if (savedEmail) {
+        document.getElementById('loginEmailMenu').value = savedEmail;
+        document.getElementById('rememberMeMenu').checked = true;
+      }
+      
+      document.getElementById('loginBtnMenu').addEventListener('click', () => {
+        const email = document.getElementById('loginEmailMenu').value.trim();
+        const password = document.getElementById('loginPasswordMenu').value;
+        const errorEl = document.getElementById('loginErrorMenu');
+        const btn = document.getElementById('loginBtnMenu');
+        
+        if (!email || !password) {
+          errorEl.textContent = 'Ingresa correo y contraseña';
+          errorEl.classList.add('show');
+          return;
+        }
+        
+        errorEl.classList.remove('show');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+        btn.disabled = true;
+        
+        auth.signInWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            sessionStorage.setItem("adminLoggedIn", "true");
+            sessionStorage.setItem("adminEmail", userCredential.user.email);
+            
+            if (document.getElementById('rememberMeMenu').checked) {
+              localStorage.setItem('rememberedEmailIndex', email);
+            } else {
+              localStorage.removeItem('rememberedEmailIndex');
+            }
+            
+            location.reload();
+          })
+          .catch((error) => {
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+            btn.disabled = false;
+            let msg = 'Credenciales incorrectas';
+            if (error.code === 'auth/user-not-found') msg = 'Usuario no encontrado';
+            if (error.code === 'auth/wrong-password') msg = 'Contraseña incorrecta';
+            errorEl.textContent = msg;
+            errorEl.classList.add('show');
+          });
+      });
+      
+      // Enter key
+      document.getElementById('loginPasswordMenu')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('loginBtnMenu').click();
+      });
+      document.getElementById('loginEmailMenu')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('loginPasswordMenu').focus();
+      });
+    }
+    
+    // Mostrar/ocultar botones de admin
+    document.getElementById('openAddTeamBtn').style.display = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('openAddPlayerBtn').style.display = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('openAddScorerBtn').style.display = isAdmin ? 'inline-block' : 'none';
+    document.getElementById('openAddAssistBtn').style.display = isAdmin ? 'inline-block' : 'none';
+  }
+
+  // ==================== VERIFICAR SESIÓN ====================
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      sessionStorage.setItem("adminLoggedIn", "true");
+      sessionStorage.setItem("adminEmail", user.email);
+    } else {
+      sessionStorage.removeItem("adminLoggedIn");
+      sessionStorage.removeItem("adminEmail");
+    }
+    updateAuthUI();
+  });
+
+  // ==================== INICIALIZACIÓN ====================
+  const connectionStatus = document.getElementById('connectionStatus');
+  
+  db.collection('tabla_posiciones').onSnapshot(
+    () => {
+      connectionStatus.className = 'connection-status online';
+      connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Conectado';
+    },
+    () => {
+      connectionStatus.className = 'connection-status offline';
+      connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Sin conexión';
+    }
+  );
+
+  // Equipos
+  db.collection('tabla_posiciones').onSnapshot((snapshot) => {
+    const teamsList = [];
+    snapshot.forEach(doc => { const data = doc.data(); data.id = doc.id; teamsList.push(data); });
+    renderTable(teamsList);
+    populateManageSelects(teamsList);
+    populatePlayerTeamSelect(teamsList);
+  });
+
+  // Goleadores
+  db.collection('goleadores').onSnapshot((snapshot) => {
+    const scorersList = [];
+    snapshot.forEach(doc => { const data = doc.data(); data.id = doc.id; scorersList.push(data); });
+    renderScorersTable(scorersList);
+  });
+
+  // Asistentes
+  db.collection('asistentes').onSnapshot((snapshot) => {
+    const assistsList = [];
+    snapshot.forEach(doc => { const data = doc.data(); data.id = doc.id; assistsList.push(data); });
+    renderAssistsTable(assistsList);
+  });
+
+  // Fase Final
+  db.collection('fase_final').doc('configuracion').onSnapshot((doc) => {
+    const data = doc.data() || { semifinal: { team1: "", team2: "", score1: "", score2: "", date: "" }, final: { team1: "", team2: "", score1: "", score2: "", date: "" } };
+    renderFinalPhase(data);
+  });
 
   // ==================== MENÚ ====================
   const menuToggle = document.getElementById('menuToggle');
@@ -1354,8 +1170,6 @@
   function openMenu() { menuPanel.classList.add('active'); menuOverlay.classList.add('active'); }
   if (menuToggle) menuToggle.addEventListener('click', (e) => { e.stopPropagation(); if (menuPanel.classList.contains('active')) closeMenu(); else openMenu(); });
   if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
-
-  updateAuthUI();
 </script>
 </body>
 </html>
